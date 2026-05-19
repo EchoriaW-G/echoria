@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { notFound } from "next/navigation";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,20 +19,12 @@ export default async function MessagePage({
     .eq("id", id)
     .single();
 
-  if (error) {
-    return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        <pre>{JSON.stringify(error, null, 2)}</pre>
-      </main>
-    );
+  if (error || !message) {
+    notFound();
   }
 
-  if (!message) {
-    return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        Message not found
-      </main>
-    );
+  if (!["paid", "sent"].includes(message.status)) {
+    notFound();
   }
 
   return (
@@ -41,17 +34,23 @@ export default async function MessagePage({
           ECHORIA
         </p>
 
-        <h1 className="text-4xl font-bold">
+        <h1 className="text-4xl md:text-5xl font-bold leading-tight">
           Masz wiadomość 💌
         </h1>
 
         {message.dedication && (
-          <div className="bg-white/5 rounded-2xl p-6">
-            <p className="italic">"{message.dedication}"</p>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <p className="text-gray-300 italic text-lg">
+              “{message.dedication}”
+            </p>
           </div>
         )}
 
         <audio controls src={message.audio_url} className="w-full" />
+
+        <p className="text-gray-500 text-sm">
+          Dostarczone przez Echoria
+        </p>
       </div>
     </main>
   );
