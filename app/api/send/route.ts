@@ -38,10 +38,47 @@ export async function POST() {
         to: message.recipient_email,
         subject: "Masz wiadomość od Echoria 💌",
         html: `
-          <h1>Masz nową wiadomość 💌</h1>
-          <p>${message.dedication || ""}</p>
-          <p>Odtwórz wiadomość:</p>
-          <a href="${message.audio_url}">Odtwórz audio</a>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background: #000; color: #fff; text-align: center;">
+            <p style="letter-spacing: 0.3em; font-size: 12px; color: #888;">
+              ECHORIA
+            </p>
+
+            <h1 style="font-size: 36px; margin: 20px 0;">
+              Masz wiadomość 💌
+            </h1>
+
+            ${
+              message.dedication
+                ? `
+              <div style="background: rgba(255,255,255,0.06); padding: 24px; border-radius: 16px; margin: 24px 0;">
+                <p style="font-style: italic; color: #ddd; font-size: 18px;">
+                  "${message.dedication}"
+                </p>
+              </div>
+            `
+                : ""
+            }
+
+            <a
+              href="https://echoria.vercel.app/message/${message.id}"
+              style="
+                display:inline-block;
+                margin-top:24px;
+                padding:16px 28px;
+                background:#fff;
+                color:#000;
+                text-decoration:none;
+                border-radius:12px;
+                font-weight:bold;
+              "
+            >
+              Otwórz wiadomość
+            </a>
+
+            <p style="margin-top:40px; font-size:12px; color:#666;">
+              Dostarczone przez Echoria
+            </p>
+          </div>
         `,
       });
 
