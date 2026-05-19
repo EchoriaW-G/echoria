@@ -1,30 +1,37 @@
 import { createClient } from "@supabase/supabase-js";
-import { notFound } from "next/navigation";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-type Props = {
-  params: {
-    id: string;
-  };
-};
+export default async function MessagePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-export default async function MessagePage({ params }: Props) {
   const { data: message, error } = await supabase
     .from("messages")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
-  if (error || !message) {
-    notFound();
+  if (error) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <pre>{JSON.stringify(error, null, 2)}</pre>
+      </main>
+    );
   }
 
-  if (!["paid", "sent"].includes(message.status)) {
-    notFound();
+  if (!message) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        Message not found
+      </main>
+    );
   }
 
   return (
@@ -34,27 +41,17 @@ export default async function MessagePage({ params }: Props) {
           ECHORIA
         </p>
 
-        <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+        <h1 className="text-4xl font-bold">
           Masz wiadomość 💌
         </h1>
 
         {message.dedication && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <p className="text-gray-300 italic text-lg">
-              “{message.dedication}”
-            </p>
+          <div className="bg-white/5 rounded-2xl p-6">
+            <p className="italic">"{message.dedication}"</p>
           </div>
         )}
 
-        <audio
-          controls
-          src={message.audio_url}
-          className="w-full"
-        />
-
-        <p className="text-gray-500 text-sm">
-          Dostarczone przez Echoria
-        </p>
+        <audio controls src={message.audio_url} className="w-full" />
       </div>
     </main>
   );
