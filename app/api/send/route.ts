@@ -34,7 +34,7 @@ export async function POST() {
 
     for (const message of messages) {
       await resend.emails.send({
-        from: "onboarding@resend.dev",
+        from: "kontakt@echoria.pl",
         to: message.recipient_email,
         subject: "Masz wiadomość od Echoria 💌",
         html: `
@@ -60,7 +60,7 @@ export async function POST() {
             }
 
             <a
-              href="https://echoria.vercel.app/message/${message.id}"
+              href="https://app.echoria.pl/message/${message.id}"
               style="
                 display:inline-block;
                 margin-top:24px;
