@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
         messageId,
       },
 
-      success_url: "https://echoria.vercel.app?success=true",
-      cancel_url: "https://echoria.vercel.app?canceled=true",
+      success_url: "https://app.echoria.pl/payment-success",
+      cancel_url: "https://app.echoria.pl",
     });
 
     return NextResponse.json({
