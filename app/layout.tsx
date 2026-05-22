@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+import PlausibleProvider from "next-plausible";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,15 +28,11 @@ export default function RootLayout({
       lang="pl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
-        <Script
-          defer
-          data-domain="app.echoria.pl"
-          src="https://plausible.io/js/script.js"
-        />
-      </head>
-
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <PlausibleProvider domain="app.echoria.pl">
+          {children}
+        </PlausibleProvider>
+      </body>
     </html>
   );
 }

@@ -1,9 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { usePlausible } from "next-plausible";
 import { supabase } from "./lib/supabase";
 
 export default function Home() {
+  const plausible = usePlausible();
+
   const [step, setStep] = useState<"record" | "details" | "delivery">("record");
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -83,6 +86,7 @@ export default function Home() {
       };
 
       mediaRecorder.start();
+      plausible("recording_started");
       setIsRecording(true);
     } catch (err) {
       alert(String(err));
@@ -127,6 +131,8 @@ export default function Home() {
         setIsSaving(false);
         return;
       }
+
+      plausible("checkout_started");
 
       const response = await fetch("/api/stripe", {
         method: "POST",
