@@ -25,6 +25,22 @@ export default function Home() {
   const audioChunksRef = useRef<Blob[]>([]);
   const mimeTypeRef = useRef<string>("audio/webm");
 
+  const isValidEmail = (email: string) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  const canContinueToDelivery =
+    recipientName.trim() !== "" &&
+    recipientEmail.trim() !== "" &&
+    isValidEmail(recipientEmail);
+
+  const canProceedToPayment =
+    deliveryDate !== "" &&
+    acceptTerms &&
+    acceptDigitalService &&
+    confirmRecipientConsent &&
+    !isSaving;
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -110,8 +126,8 @@ export default function Home() {
       return;
     }
 
-    if (!acceptTerms || !acceptDigitalService || !confirmRecipientConsent) {
-      alert("Aby kontynuować, zaakceptuj wszystkie wymagane zgody.");
+    if (!canProceedToPayment) {
+      alert("Uzupełnij wszystkie wymagane pola i zgody.");
       return;
     }
 
@@ -124,7 +140,7 @@ export default function Home() {
           recipient_name: recipientName,
           recipient_email: recipientEmail,
           dedication,
-          delivery_date: deliveryDate || null,
+          delivery_date: deliveryDate,
           audio_url: uploadedAudioUrl,
           status: "pending",
         })
@@ -212,8 +228,7 @@ export default function Home() {
               />
               <span>
                 Rozumiem, że realizacja spersonalizowanej usługi cyfrowej
-                rozpoczyna się po zakupie i mogę utracić prawo odstąpienia od
-                umowy.
+                rozpoczyna się po zakupie i mogę utracić prawo odstąpienia.
               </span>
             </label>
 
@@ -224,20 +239,14 @@ export default function Home() {
                 onChange={(e) => setConfirmRecipientConsent(e.target.checked)}
               />
               <span>
-                Potwierdzam, że mam prawo podać adres e-mail odbiorcy w celu
-                dostarczenia wiadomości.
+                Potwierdzam, że mam prawo podać adres e-mail odbiorcy.
               </span>
             </label>
           </div>
 
           <button
             onClick={saveMessage}
-            disabled={
-              !acceptTerms ||
-              !acceptDigitalService ||
-              !confirmRecipientConsent ||
-              isSaving
-            }
+            disabled={!canProceedToPayment}
             className="px-6 py-4 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
           >
             {isSaving ? "Przekierowanie..." : "Przejdź do płatności"}
@@ -277,15 +286,22 @@ export default function Home() {
           />
 
           <textarea
-            placeholder="Dodaj dedykację..."
+            placeholder="Dodaj dedykację (opcjonalnie)..."
             value={dedication}
             onChange={(e) => setDedication(e.target.value)}
             className="p-4 rounded-xl bg-white text-black min-h-[120px]"
           />
 
+          {!isValidEmail(recipientEmail) && recipientEmail.length > 0 && (
+            <p className="text-red-400 text-sm">
+              Podaj poprawny adres e-mail.
+            </p>
+          )}
+
           <button
             onClick={() => setStep("delivery")}
-            className="px-6 py-4 bg-white text-black rounded-xl font-semibold"
+            disabled={!canContinueToDelivery}
+            className="px-6 py-4 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
           >
             Dalej
           </button>
@@ -312,7 +328,8 @@ export default function Home() {
       {!isRecording ? (
         <button
           onClick={startRecording}
-          className="px-6 py-3 bg-white text-black rounded-xl font-semibold"
+          disabled={isUploading}
+          className="px-6 py-3 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
         >
           Rozpocznij nagrywanie
         </button>
@@ -346,6 +363,37 @@ export default function Home() {
           </button>
         </div>
       )}
+
+      <footer className="mt-10 text-sm text-gray-500 flex flex-wrap gap-4 justify-center">
+        <a
+          href="https://echoria.pl/index.php/regulamin/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Regulamin
+        </a>
+        <a
+          href="https://echoria.pl/index.php/polityka-prywatnosci-2/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Prywatność
+        </a>
+        <a
+          href="https://echoria.pl/index.php/polityka-zwrotow/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Zwroty
+        </a>
+        <a
+          href="https://echoria.pl/index.php/kontakt/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Kontakt
+        </a>
+      </footer>
     </main>
   );
 }
