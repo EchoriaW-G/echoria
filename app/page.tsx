@@ -185,16 +185,18 @@ export default function Home() {
               <span>
                 Akceptuję{" "}
                 <a
-                  href="https://echoria.pl/regulamin/"
+                  href="https://echoria.pl/index.php/regulamin/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="underline"
                 >
                   Regulamin
                 </a>{" "}
                 oraz{" "}
                 <a
-                  href="https://echoria.pl/polityka-prywatnosci-2/"
+                  href="https://echoria.pl/index.php/polityka-prywatnosci-2/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="underline"
                 >
                   Politykę Prywatności
