@@ -3,12 +3,6 @@
 import { useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
-declare global {
-  interface Window {
-    plausible?: (eventName: string) => void;
-  }
-}
-
 export default function Home() {
   const [step, setStep] = useState<"record" | "details" | "delivery">("record");
   const [isRecording, setIsRecording] = useState(false);
@@ -22,6 +16,10 @@ export default function Home() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [dedication, setDedication] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
+
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptDigitalService, setAcceptDigitalService] = useState(false);
+  const [confirmRecipientConsent, setConfirmRecipientConsent] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -89,7 +87,6 @@ export default function Home() {
       };
 
       mediaRecorder.start();
-      window.plausible?.("recording_started");
       setIsRecording(true);
     } catch (err) {
       alert(String(err));
@@ -110,6 +107,11 @@ export default function Home() {
   const saveMessage = async () => {
     if (!uploadedAudioUrl) {
       alert("Nagranie nie zostało przesłane.");
+      return;
+    }
+
+    if (!acceptTerms || !acceptDigitalService || !confirmRecipientConsent) {
+      alert("Aby kontynuować, zaakceptuj wszystkie wymagane zgody.");
       return;
     }
 
@@ -134,8 +136,6 @@ export default function Home() {
         setIsSaving(false);
         return;
       }
-
-      window.plausible?.("checkout_started");
 
       const response = await fetch("/api/stripe", {
         method: "POST",
@@ -175,9 +175,68 @@ export default function Home() {
             className="p-4 rounded-xl bg-white text-black"
           />
 
+          <div className="flex flex-col gap-4 text-sm text-gray-300">
+            <label className="flex gap-3 items-start">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+              />
+              <span>
+                Akceptuję{" "}
+                <a
+                  href="https://echoria.pl/regulamin"
+                  target="_blank"
+                  className="underline"
+                >
+                  Regulamin
+                </a>{" "}
+                oraz{" "}
+                <a
+                  href="https://echoria.pl/polityka-prywatnosci"
+                  target="_blank"
+                  className="underline"
+                >
+                  Politykę Prywatności
+                </a>.
+              </span>
+            </label>
+
+            <label className="flex gap-3 items-start">
+              <input
+                type="checkbox"
+                checked={acceptDigitalService}
+                onChange={(e) => setAcceptDigitalService(e.target.checked)}
+              />
+              <span>
+                Rozumiem, że realizacja spersonalizowanej usługi cyfrowej
+                rozpoczyna się po zakupie i mogę utracić prawo odstąpienia od
+                umowy.
+              </span>
+            </label>
+
+            <label className="flex gap-3 items-start">
+              <input
+                type="checkbox"
+                checked={confirmRecipientConsent}
+                onChange={(e) => setConfirmRecipientConsent(e.target.checked)}
+              />
+              <span>
+                Potwierdzam, że mam prawo podać adres e-mail odbiorcy w celu
+                dostarczenia wiadomości.
+              </span>
+            </label>
+          </div>
+
           <button
             onClick={saveMessage}
-            className="px-6 py-4 bg-white text-black rounded-xl font-semibold"
+            disabled={
+              !acceptTerms ||
+              !acceptDigitalService ||
+              !confirmRecipientConsent ||
+              isSaving
+            }
+            className="px-6 py-4 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
           >
             {isSaving ? "Przekierowanie..." : "Przejdź do płatności"}
           </button>
