@@ -3,6 +3,23 @@
 import { useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
+const deliverySlots = [
+  "08:00",
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+  "18:00",
+  "19:00",
+  "20:00",
+  "21:00",
+];
+
 export default function Home() {
   const [step, setStep] = useState<"record" | "details" | "delivery">("record");
   const [isRecording, setIsRecording] = useState(false);
@@ -17,7 +34,7 @@ export default function Home() {
   const [dedication, setDedication] = useState("");
 
   const [deliveryDate, setDeliveryDate] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
+  const [deliverySlot, setDeliverySlot] = useState("");
 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDigitalService, setAcceptDigitalService] = useState(false);
@@ -36,7 +53,7 @@ export default function Home() {
 
   const canProceedToPayment =
     deliveryDate !== "" &&
-    deliveryTime !== "" &&
+    deliverySlot !== "" &&
     acceptTerms &&
     acceptDigitalService &&
     confirmRecipientConsent &&
@@ -44,7 +61,7 @@ export default function Home() {
 
   const buildDeliveryTimestamp = () => {
     const [year, month, day] = deliveryDate.split("-").map(Number);
-    const [hours, minutes] = deliveryTime.split(":").map(Number);
+    const [hours, minutes] = deliverySlot.split(":").map(Number);
 
     const localDate = new Date(
       year,
@@ -56,6 +73,13 @@ export default function Home() {
     );
 
     return localDate.toISOString();
+  };
+
+  const getSlotLabel = (slot: string) => {
+    const [hour] = slot.split(":").map(Number);
+    const nextHour = hour + 1;
+
+    return `Między ${hour}:00 a ${nextHour}:00`;
   };
 
   const startRecording = async () => {
@@ -143,11 +167,6 @@ export default function Home() {
       return;
     }
 
-    if (!canProceedToPayment) {
-      alert("Uzupełnij wszystkie wymagane pola.");
-      return;
-    }
-
     setIsSaving(true);
 
     try {
@@ -208,12 +227,22 @@ export default function Home() {
             className="p-4 rounded-xl bg-white text-black"
           />
 
-          <input
-            type="time"
-            value={deliveryTime}
-            onChange={(e) => setDeliveryTime(e.target.value)}
+          <select
+            value={deliverySlot}
+            onChange={(e) => setDeliverySlot(e.target.value)}
             className="p-4 rounded-xl bg-white text-black"
-          />
+          >
+            <option value="">Wybierz przedział czasowy</option>
+            {deliverySlots.map((slot) => (
+              <option key={slot} value={slot}>
+                {getSlotLabel(slot)}
+              </option>
+            ))}
+          </select>
+
+          <p className="text-sm text-gray-400">
+            Wiadomość zostanie dostarczona w wybranym przedziale czasowym.
+          </p>
 
           <div className="flex flex-col gap-4 text-sm text-gray-300">
             <label className="flex gap-3 items-start">
@@ -223,24 +252,7 @@ export default function Home() {
                 onChange={(e) => setAcceptTerms(e.target.checked)}
               />
               <span>
-                Akceptuję{" "}
-                <a
-                  href="https://echoria.pl/index.php/regulamin/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Regulamin
-                </a>{" "}
-                oraz{" "}
-                <a
-                  href="https://echoria.pl/index.php/polityka-prywatnosci-2/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Politykę Prywatności
-                </a>.
+                Akceptuję regulamin i politykę prywatności.
               </span>
             </label>
 
@@ -251,7 +263,7 @@ export default function Home() {
                 onChange={(e) => setAcceptDigitalService(e.target.checked)}
               />
               <span>
-                Rozumiem, że realizacja usługi cyfrowej rozpoczyna się po zakupie.
+                Rozumiem rozpoczęcie realizacji usługi po zakupie.
               </span>
             </label>
 
@@ -262,7 +274,7 @@ export default function Home() {
                 onChange={(e) => setConfirmRecipientConsent(e.target.checked)}
               />
               <span>
-                Potwierdzam, że mam prawo podać adres e-mail odbiorcy.
+                Potwierdzam prawo do podania adresu odbiorcy.
               </span>
             </label>
           </div>
@@ -309,17 +321,11 @@ export default function Home() {
           />
 
           <textarea
-            placeholder="Dodaj dedykację (opcjonalnie)..."
+            placeholder="Dodaj dedykację (opcjonalnie)"
             value={dedication}
             onChange={(e) => setDedication(e.target.value)}
             className="p-4 rounded-xl bg-white text-black min-h-[120px]"
           />
-
-          {!isValidEmail(recipientEmail) && recipientEmail.length > 0 && (
-            <p className="text-red-400 text-sm">
-              Podaj poprawny adres e-mail.
-            </p>
-          )}
 
           <button
             onClick={() => setStep("delivery")}
@@ -327,13 +333,6 @@ export default function Home() {
             className="px-6 py-4 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
           >
             Dalej
-          </button>
-
-          <button
-            onClick={() => setStep("record")}
-            className="text-gray-400"
-          >
-            Wróć
           </button>
         </div>
       </main>
@@ -345,14 +344,14 @@ export default function Home() {
       <h1 className="text-4xl font-bold">ECHORIA</h1>
 
       <p className="text-gray-400 text-center max-w-md">
-        Nagraj wiadomość, która dotrze dokładnie wtedy, kiedy ma znaczenie.
+        Nagraj wiadomość, która dotrze wtedy, kiedy ma znaczenie.
       </p>
 
       {!isRecording ? (
         <button
           onClick={startRecording}
           disabled={isUploading}
-          className="px-6 py-3 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
+          className="px-6 py-3 bg-white text-black rounded-xl font-semibold"
         >
           Rozpocznij nagrywanie
         </button>
@@ -365,24 +364,16 @@ export default function Home() {
         </button>
       )}
 
-      {isUploading && <p>Trwa przesyłanie nagrania...</p>}
+      {isUploading && <p>Przesyłanie nagrania...</p>}
 
       {audioUrl && !isUploading && (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col gap-4 items-center">
           <audio controls src={audioUrl} />
-
           <button
             onClick={() => setStep("details")}
             className="px-6 py-3 bg-white text-black rounded-xl font-semibold"
           >
             Dalej
-          </button>
-
-          <button
-            onClick={deleteRecording}
-            className="px-4 py-2 border border-white rounded-xl"
-          >
-            Usuń nagranie
           </button>
         </div>
       )}
