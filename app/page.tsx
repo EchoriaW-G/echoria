@@ -15,7 +15,9 @@ export default function Home() {
   const [recipientName, setRecipientName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [dedication, setDedication] = useState("");
+
   const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDigitalService, setAcceptDigitalService] = useState(false);
@@ -25,9 +27,7 @@ export default function Home() {
   const audioChunksRef = useRef<Blob[]>([]);
   const mimeTypeRef = useRef<string>("audio/webm");
 
-  const isValidEmail = (email: string) => {
-    return /\S+@\S+\.\S+/.test(email);
-  };
+  const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
   const canContinueToDelivery =
     recipientName.trim() !== "" &&
@@ -36,10 +36,15 @@ export default function Home() {
 
   const canProceedToPayment =
     deliveryDate !== "" &&
+    deliveryTime !== "" &&
     acceptTerms &&
     acceptDigitalService &&
     confirmRecipientConsent &&
     !isSaving;
+
+  const buildDeliveryTimestamp = () => {
+    return `${deliveryDate}T${deliveryTime}:00`;
+  };
 
   const startRecording = async () => {
     try {
@@ -127,7 +132,7 @@ export default function Home() {
     }
 
     if (!canProceedToPayment) {
-      alert("Uzupełnij wszystkie wymagane pola i zgody.");
+      alert("Uzupełnij wszystkie wymagane pola.");
       return;
     }
 
@@ -140,7 +145,7 @@ export default function Home() {
           recipient_name: recipientName,
           recipient_email: recipientEmail,
           dedication,
-          delivery_date: deliveryDate,
+          delivery_date: buildDeliveryTimestamp(),
           audio_url: uploadedAudioUrl,
           status: "pending",
         })
@@ -182,12 +187,19 @@ export default function Home() {
     return (
       <main className="min-h-screen flex items-center justify-center bg-black text-white px-6">
         <div className="w-full max-w-md flex flex-col gap-4">
-          <h1 className="text-3xl font-bold">Data dostarczenia</h1>
+          <h1 className="text-3xl font-bold">Termin dostarczenia</h1>
 
           <input
             type="date"
             value={deliveryDate}
             onChange={(e) => setDeliveryDate(e.target.value)}
+            className="p-4 rounded-xl bg-white text-black"
+          />
+
+          <input
+            type="time"
+            value={deliveryTime}
+            onChange={(e) => setDeliveryTime(e.target.value)}
             className="p-4 rounded-xl bg-white text-black"
           />
 
@@ -227,8 +239,7 @@ export default function Home() {
                 onChange={(e) => setAcceptDigitalService(e.target.checked)}
               />
               <span>
-                Rozumiem, że realizacja spersonalizowanej usługi cyfrowej
-                rozpoczyna się po zakupie i mogę utracić prawo odstąpienia.
+                Rozumiem, że realizacja usługi cyfrowej rozpoczyna się po zakupie.
               </span>
             </label>
 
@@ -363,37 +374,6 @@ export default function Home() {
           </button>
         </div>
       )}
-
-      <footer className="mt-10 text-sm text-gray-500 flex flex-wrap gap-4 justify-center">
-        <a
-          href="https://echoria.pl/index.php/regulamin/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Regulamin
-        </a>
-        <a
-          href="https://echoria.pl/index.php/polityka-prywatnosci-2/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Prywatność
-        </a>
-        <a
-          href="https://echoria.pl/index.php/polityka-zwrotow/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Zwroty
-        </a>
-        <a
-          href="https://echoria.pl/index.php/kontakt/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Kontakt
-        </a>
-      </footer>
     </main>
   );
 }
