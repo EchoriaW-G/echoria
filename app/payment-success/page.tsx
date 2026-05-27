@@ -23,7 +23,7 @@ export default function PaymentSuccessPage() {
 
         <button
           onClick={() => (window.location.href = "/")}
-          className="mt-4 px-10 py-4 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
+          className="px-8 py-2 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
         >
           Nagraj kolejną wiadomość
         </button>
