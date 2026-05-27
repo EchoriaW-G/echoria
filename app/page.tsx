@@ -346,7 +346,7 @@ export default function Home() {
       <img
   src="/logo2.png"
   alt="Echoria"
-  className="w-44 h-auto md:w-56"
+  className="w-72 h-auto md:w-96"
 />
 
       <p className="text-gray-400 text-center max-w-md">
