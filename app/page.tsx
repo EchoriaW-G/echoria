@@ -364,7 +364,7 @@ export default function Home() {
       ) : (
         <button
           onClick={stopRecording}
-          className="px-6 py-3 bg-red-500 rounded-xl font-semibold"
+          className="px-6 py-2 bg-white text-black rounded-xl font-semibold hover:opacity-90 transition"
         >
           Zatrzymaj nagrywanie
         </button>
