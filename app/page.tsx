@@ -344,7 +344,7 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 bg-black text-white px-6">
       <img
-  src="/logo.png"
+  src="/logo2.png"
   alt="Echoria"
   className="w-44 h-auto md:w-56"
 />
