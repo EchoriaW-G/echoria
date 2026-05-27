@@ -342,7 +342,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6 bg-black text-white px-6">
+    <main className="min-h-screen flex flex-col items-center justify-center gap-3 bg-black text-white px-6">
       <img
   src="/logo2.png"
   alt="Echoria"
@@ -350,7 +350,7 @@ export default function Home() {
 />
 
       <p className="text-gray-400 text-center max-w-md">
-        Nagraj wiadomość, która dotrze dokładnie wtedy, kiedy ma znaczenie.
+        Nagraj wiadomość, która wybrzmi we właściwym momencie.
       </p>
 
       {!isRecording ? (
