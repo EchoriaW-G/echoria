@@ -1,25 +1,32 @@
 export default function PaymentSuccessPage() {
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="max-w-xl w-full text-center flex flex-col gap-6">
-        <p className="text-sm uppercase tracking-[0.3em] text-gray-500">
-          ECHORIA
-        </p>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 antialiased">
+      <div className="max-w-2xl w-full flex flex-col items-center text-center gap-8">
 
-        <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-          Twoja wiadomość została zapisana 💌
-        </h1>
+        <img
+          src="/logo2.png"
+          alt="Echoria"
+          className="w-52 md:w-72 h-auto opacity-90"
+        />
 
-        <p className="text-lg text-gray-300">
-          Odbiorca otrzyma ją w wybranym przez Ciebie terminie.
-        </p>
+        <div className="flex flex-col gap-5">
+          <h1 className="text-5xl md:text-7xl font-serif font-light leading-tight tracking-wide">
+            Twoja wiadomość
+            <br />
+            została zapisana
+          </h1>
 
-        <a
-          href="/"
-          className="inline-block mt-4 bg-white text-black px-6 py-4 rounded-2xl font-semibold hover:opacity-90 transition"
+          <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-light">
+            Odbiorca otrzyma ją w wybranym przez Ciebie momencie.
+          </p>
+        </div>
+
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="mt-4 px-10 py-4 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
         >
           Wyślij kolejną wiadomość
-        </a>
+        </button>
       </div>
     </main>
   );
