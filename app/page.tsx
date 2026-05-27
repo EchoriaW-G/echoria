@@ -43,7 +43,18 @@ export default function Home() {
     !isSaving;
 
   const buildDeliveryTimestamp = () => {
-    const localDate = new Date(`${deliveryDate}T${deliveryTime}`);
+    const [year, month, day] = deliveryDate.split("-").map(Number);
+    const [hours, minutes] = deliveryTime.split(":").map(Number);
+
+    const localDate = new Date(
+      year,
+      month - 1,
+      day,
+      hours,
+      minutes,
+      0
+    );
+
     return localDate.toISOString();
   };
 
