@@ -16,9 +16,9 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "pln",
             product_data: {
-              name: "Wiadomość audio Echoria",
+              name: "Echo - Personalizowana Wiadomość Audio od Echorii",
             },
-            unit_amount: 1900,
+            unit_amount: 3900,
           },
           quantity: 1,
         },
