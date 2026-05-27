@@ -13,7 +13,7 @@ export default function PaymentSuccessPage() {
 
         <div className="flex flex-col gap-5">
           <h1 className="text-5xl md:text-7xl font-serif font-light leading-tight tracking-wide">
-            Echo ruszyło w drogę!
+            Echo wyruszyło w drogę!
           </h1>
 
           <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-light">
