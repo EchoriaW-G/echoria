@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
@@ -342,7 +343,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 bg-black text-white px-6">
-      <h1 className="text-4xl font-bold">ECHORIA</h1>
+      <<Image
+  src="/logo.png"
+  alt="Echoria"
+  width={260}
+  height={260}
+  priority
+  className="w-44 h-auto md:w-56"
+/>
 
       <p className="text-gray-400 text-center max-w-md">
         Nagraj wiadomość, która dotrze dokładnie wtedy, kiedy ma znaczenie.
