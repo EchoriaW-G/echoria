@@ -43,7 +43,8 @@ export default function Home() {
     !isSaving;
 
   const buildDeliveryTimestamp = () => {
-    return `${deliveryDate}T${deliveryTime}:00`;
+    const localDate = new Date(`${deliveryDate}T${deliveryTime}`);
+    return localDate.toISOString();
   };
 
   const startRecording = async () => {
