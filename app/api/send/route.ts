@@ -11,13 +11,13 @@ const supabase = createClient(
 
 export async function POST() {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const now = new Date().toISOString();
 
     const { data: messages, error } = await supabase
       .from("messages")
       .select("*")
       .eq("status", "paid")
-      .lte("delivery_date", today);
+      .lte("delivery_date", now);
 
     if (error) {
       return NextResponse.json(
