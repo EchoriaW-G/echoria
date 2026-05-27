@@ -357,7 +357,7 @@ export default function Home() {
         <button
           onClick={startRecording}
           disabled={isUploading}
-          className="px-6 py-3 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
+          className="px-6 py-2 bg-white text-black rounded-xl font-semibold hover:opacity-90 transition"
         >
           Rozpocznij nagrywanie
         </button>
