@@ -1,3 +1,5 @@
+"use client";
+
 export default function PaymentSuccessPage() {
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 antialiased">
@@ -11,13 +13,11 @@ export default function PaymentSuccessPage() {
 
         <div className="flex flex-col gap-5">
           <h1 className="text-5xl md:text-7xl font-serif font-light leading-tight tracking-wide">
-            Twoja wiadomość
-            <br />
-            została zapisana
+            Echo ruszyło w drogę!
           </h1>
 
           <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-light">
-            Odbiorca otrzyma ją w wybranym przez Ciebie momencie.
+            Odbiorca otrzyma je w wybranym przez Ciebie momencie.
           </p>
         </div>
 
@@ -25,8 +25,9 @@ export default function PaymentSuccessPage() {
           onClick={() => (window.location.href = "/")}
           className="mt-4 px-10 py-4 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
         >
-          Wyślij kolejną wiadomość
+          Nagraj kolejną wiadomość
         </button>
+
       </div>
     </main>
   );
