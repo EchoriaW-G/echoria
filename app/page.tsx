@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
@@ -198,25 +197,27 @@ export default function Home() {
 
   if (step === "delivery") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-white px-6">
-        <div className="w-full max-w-md flex flex-col gap-4">
-          <h1 className="text-3xl font-bold">Termin dostarczenia</h1>
+      <main className="min-h-screen flex items-center justify-center bg-black text-white antialiased px-6">
+        <div className="w-full max-w-md flex flex-col gap-5">
+          <h1 className="text-4xl font-serif font-light tracking-wide">
+            Termin dostarczenia
+          </h1>
 
           <input
             type="date"
             value={deliveryDate}
             onChange={(e) => setDeliveryDate(e.target.value)}
-            className="p-4 rounded-xl bg-white text-black"
+            className="p-4 rounded-2xl bg-white text-black"
           />
 
           <input
             type="time"
             value={deliveryTime}
             onChange={(e) => setDeliveryTime(e.target.value)}
-            className="p-4 rounded-xl bg-white text-black"
+            className="p-4 rounded-2xl bg-white text-black"
           />
 
-          <div className="flex flex-col gap-4 text-sm text-gray-300">
+          <div className="flex flex-col gap-4 text-sm text-gray-300 leading-relaxed">
             <label className="flex gap-3 items-start">
               <input
                 type="checkbox"
@@ -271,14 +272,14 @@ export default function Home() {
           <button
             onClick={saveMessage}
             disabled={!canProceedToPayment}
-            className="px-6 py-4 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
+            className="px-6 py-3 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
           >
             {isSaving ? "Przekierowanie..." : "Przejdź do płatności"}
           </button>
 
           <button
             onClick={() => setStep("details")}
-            className="text-gray-400"
+            className="text-gray-400 text-sm"
           >
             Wróć
           </button>
@@ -289,16 +290,18 @@ export default function Home() {
 
   if (step === "details") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-white px-6">
-        <div className="w-full max-w-md flex flex-col gap-4">
-          <h1 className="text-3xl font-bold">Szczegóły odbiorcy</h1>
+      <main className="min-h-screen flex items-center justify-center bg-black text-white antialiased px-6">
+        <div className="w-full max-w-md flex flex-col gap-5">
+          <h1 className="text-4xl font-serif font-light tracking-wide">
+            Szczegóły odbiorcy
+          </h1>
 
           <input
             type="text"
             placeholder="Imię odbiorcy"
             value={recipientName}
             onChange={(e) => setRecipientName(e.target.value)}
-            className="p-4 rounded-xl bg-white text-black"
+            className="p-4 rounded-2xl bg-white text-black"
           />
 
           <input
@@ -306,14 +309,14 @@ export default function Home() {
             placeholder="Adres e-mail odbiorcy"
             value={recipientEmail}
             onChange={(e) => setRecipientEmail(e.target.value)}
-            className="p-4 rounded-xl bg-white text-black"
+            className="p-4 rounded-2xl bg-white text-black"
           />
 
           <textarea
             placeholder="Dodaj dedykację (opcjonalnie)..."
             value={dedication}
             onChange={(e) => setDedication(e.target.value)}
-            className="p-4 rounded-xl bg-white text-black min-h-[120px]"
+            className="p-4 rounded-2xl bg-white text-black min-h-[120px]"
           />
 
           {!isValidEmail(recipientEmail) && recipientEmail.length > 0 && (
@@ -325,14 +328,14 @@ export default function Home() {
           <button
             onClick={() => setStep("delivery")}
             disabled={!canContinueToDelivery}
-            className="px-6 py-4 bg-white text-black rounded-xl font-semibold disabled:opacity-50"
+            className="px-6 py-3 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
           >
             Dalej
           </button>
 
           <button
             onClick={() => setStep("record")}
-            className="text-gray-400"
+            className="text-gray-400 text-sm"
           >
             Wróć
           </button>
@@ -342,14 +345,14 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-3 bg-black text-white px-6">
+    <main className="min-h-screen flex flex-col items-center justify-center gap-4 bg-black text-white antialiased px-6">
       <img
-  src="/logo2.png"
-  alt="Echoria"
-  className="w-72 h-auto md:w-96"
-/>
+        src="/logo2.png"
+        alt="Echoria"
+        className="w-72 h-auto md:w-96"
+      />
 
-      <p className="text-gray-400 text-center max-w-md">
+      <p className="text-gray-400 text-center max-w-xl text-lg leading-relaxed font-light">
         Nagraj wiadomość, która wybrzmi we właściwym momencie.
       </p>
 
@@ -357,20 +360,24 @@ export default function Home() {
         <button
           onClick={startRecording}
           disabled={isUploading}
-          className="px-6 py-2 bg-white text-black rounded-xl font-semibold hover:opacity-90 transition"
+          className="px-8 py-2 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
         >
           Rozpocznij nagrywanie
         </button>
       ) : (
         <button
           onClick={stopRecording}
-          className="px-6 py-2 bg-white text-black rounded-xl font-semibold hover:opacity-90 transition"
+          className="px-8 py-2 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
         >
           Zatrzymaj nagrywanie
         </button>
       )}
 
-      {isUploading && <p>Trwa przesyłanie nagrania...</p>}
+      {isUploading && (
+        <p className="text-gray-400 text-sm">
+          Trwa przesyłanie nagrania...
+        </p>
+      )}
 
       {audioUrl && !isUploading && (
         <div className="flex flex-col items-center gap-4">
@@ -378,14 +385,14 @@ export default function Home() {
 
           <button
             onClick={() => setStep("details")}
-            className="px-6 py-3 bg-white text-black rounded-xl font-semibold"
+            className="px-8 py-3 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
           >
             Dalej
           </button>
 
           <button
             onClick={deleteRecording}
-            className="px-4 py-2 border border-white rounded-xl"
+            className="px-4 py-2 border border-white/30 rounded-2xl text-sm hover:bg-white/5 transition"
           >
             Usuń nagranie
           </button>

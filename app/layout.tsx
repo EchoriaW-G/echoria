@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-cormorant",
 });
 
 export const metadata: Metadata = {
   title: "Echoria",
-  description: "Send voice messages that arrive when they matter most.",
+  description: "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
 };
 
 export default function RootLayout({
@@ -24,19 +24,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="pl"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <head>
-        <Script
-          defer
-          data-domain="app.echoria.pl"
-          src="https://plausible.io/js/script.js"
-        />
-      </head>
-
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="pl">
+      <body className={`${inter.variable} ${cormorant.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }

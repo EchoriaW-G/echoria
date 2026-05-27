@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+body {
+  font-family: var(--font-inter);
+}
+
+.font-serif {
+  font-family: var(--font-cormorant);
+}
