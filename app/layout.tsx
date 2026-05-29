@@ -18,9 +18,15 @@ export const metadata: Metadata = {
   description: "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
 
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
+    icon: "/icon.png",
     apple: "/icon.png",
+  },
+
+  openGraph: {
+    title: "Echoria",
+    description:
+      "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
+    images: ["/icon.png"],
   },
 };
 
