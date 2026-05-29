@@ -26,7 +26,22 @@ export const metadata: Metadata = {
     title: "Echoria",
     description:
       "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
-    images: ["/icon.png"],
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Echoria",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Echoria",
+    description:
+      "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
+    images: ["/opengraph-image.png"],
   },
 };
 
