@@ -1,19 +1,6 @@
-import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
-import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-cormorant",
-});
-
 export const metadata: Metadata = {
+  metadataBase: new URL("https://app.echoria.pl"),
+
   title: "Echoria",
   description: "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
 
@@ -26,14 +13,18 @@ export const metadata: Metadata = {
     title: "Echoria",
     description:
       "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
+    url: "https://app.echoria.pl",
+    siteName: "Echoria",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: "https://app.echoria.pl/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "Echoria",
       },
     ],
+    locale: "pl_PL",
+    type: "website",
   },
 
   twitter: {
@@ -41,20 +32,6 @@ export const metadata: Metadata = {
     title: "Echoria",
     description:
       "Nagrywaj wiadomości, które wybrzmią we właściwym momencie.",
-    images: ["/opengraph-image.png"],
+    images: ["https://app.echoria.pl/opengraph-image.png"],
   },
 };
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="pl">
-      <body className={`${inter.variable} ${cormorant.variable}`}>
-        {children}
-      </body>
-    </html>
-  );
-}
