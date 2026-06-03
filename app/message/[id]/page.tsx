@@ -36,20 +36,6 @@ export default async function MessagePage({
           className="w-[220px] md:w-[320px] mx-auto mb-10"
         />
 
-        <h1
-          className="
-            font-[var(--font-cormorant)]
-            text-5xl
-            md:text-7xl
-            font-light
-            leading-none
-            text-white
-            mb-8
-          "
-        >
-          Echo właśnie dotarło.
-        </h1>
-
         <p
           className="
             text-[#8f95ab]
@@ -60,7 +46,7 @@ export default async function MessagePage({
             mb-12
           "
         >
-          Ta wiadomość czekała właśnie na ten moment.
+          Twoje ECHO dotarło. Ta wiadomość czekała właśnie na ten moment.
         </p>
 
         {message.dedication && (
