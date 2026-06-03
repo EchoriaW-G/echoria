@@ -15,6 +15,7 @@ export default function Home() {
   const [recipientName, setRecipientName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
   const [dedication, setDedication] = useState("");
+  const [senderName, setSenderName] = useState("");
 
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
@@ -30,9 +31,10 @@ export default function Home() {
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
   const canContinueToDelivery =
-    recipientName.trim() !== "" &&
-    recipientEmail.trim() !== "" &&
-    isValidEmail(recipientEmail);
+  senderName.trim() !== "" &&
+  recipientName.trim() !== "" &&
+  recipientEmail.trim() !== "" &&
+  isValidEmail(recipientEmail);
 
   const canProceedToPayment =
     deliveryDate !== "" &&
@@ -154,9 +156,10 @@ export default function Home() {
       const { data, error } = await supabase
         .from("messages")
         .insert({
-          recipient_name: recipientName,
-          recipient_email: recipientEmail,
-          dedication,
+  sender_name: senderName,
+  recipient_name: recipientName,
+  recipient_email: recipientEmail,
+  dedication,
           delivery_date: buildDeliveryTimestamp(),
           audio_url: uploadedAudioUrl,
           status: "pending",
@@ -295,7 +298,13 @@ export default function Home() {
           <h1 className="text-4xl font-serif font-light tracking-wide">
             Szczegóły odbiorcy
           </h1>
-
+<input
+  type="text"
+  placeholder="Twoje imię"
+  value={senderName}
+  onChange={(e) => setSenderName(e.target.value)}
+  className="p-4 rounded-2xl bg-white text-black"
+/>
           <input
             type="text"
             placeholder="Imię odbiorcy"
