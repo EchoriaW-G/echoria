@@ -205,7 +205,7 @@ if (message.sender_email) {
           font-size:18px;
           line-height:1.7;
         ">
-          Twoja wiadomość została dostarczona zgodnie z planem.
+          Twoja wiadomość wybrzmiała we właściwym momencie.
         </p>
 
         <p style="
