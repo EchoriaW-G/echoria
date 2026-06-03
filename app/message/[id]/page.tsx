@@ -33,10 +33,10 @@ export default async function MessagePage({
         <img
           src="/logo2.png"
           alt="Echoria"
-          className="w-[220px] md:w-[320px] mx-auto mb-10"
+          className="w-[220px] md:w-[320px] mx-auto mb-4"
         />
 
-        <p className="text-gray-400 text-center max-w-xl text-lg leading-relaxed font-light">
+        <p className="text-gray-400 text-center max-w-xl mx-auto text-lg leading-relaxed font-light mb-10">
           Twoje ECHO dotarło.
           <br />
           Ta wiadomość czekała właśnie na ten moment.
