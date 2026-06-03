@@ -30,7 +30,6 @@ export default async function MessagePage({
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-12">
       <div className="max-w-4xl w-full text-center">
-
         <img
           src="/logo2.png"
           alt="Echoria"
@@ -51,7 +50,16 @@ export default async function MessagePage({
           Echo właśnie dotarło.
         </h1>
 
-        <p className="text-gray-400 text-lg md:text-xl mb-12">
+        <p
+          className="
+            text-[#8f95ab]
+            text-base
+            md:text-lg
+            font-light
+            tracking-wide
+            mb-12
+          "
+        >
           Ta wiadomość czekała właśnie na ten moment.
         </p>
 
@@ -84,7 +92,6 @@ export default async function MessagePage({
         <p className="text-gray-500 text-sm tracking-wider">
           Dostarczone przez Echoria
         </p>
-
       </div>
     </main>
   );
