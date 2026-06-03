@@ -296,7 +296,7 @@ export default function Home() {
       <main className="min-h-screen flex items-center justify-center bg-black text-white antialiased px-6">
         <div className="w-full max-w-md flex flex-col gap-5">
           <h1 className="text-4xl font-serif font-light tracking-wide">
-            Szczegóły odbiorcy
+            Szczegóły wiadomości
           </h1>
 <input
   type="text"

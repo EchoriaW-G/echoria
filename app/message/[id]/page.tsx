@@ -38,10 +38,12 @@ export default async function MessagePage({
         />
 
         <p className="text-gray-400 text-center max-w-xl mx-auto text-lg leading-relaxed font-light mb-10">
-          Twoje ECHO dotarło.
-          <br />
-          Ta wiadomość czekała właśnie na ten moment.
-        </p>
+  {message.sender_name
+    ? `${message.sender_name} przesyła Ci ECHO`
+    : "Twoje ECHO dotarło."}
+  <br />
+  Ta wiadomość czekała właśnie na ten moment.
+</p>
 
         {message.dedication && (
           <div className="max-w-3xl mx-auto mb-12">
