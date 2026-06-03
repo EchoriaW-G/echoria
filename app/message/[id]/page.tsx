@@ -36,17 +36,10 @@ export default async function MessagePage({
           className="w-[220px] md:w-[320px] mx-auto mb-10"
         />
 
-        <p
-          className="
-            text-[#8f95ab]
-            text-base
-            md:text-lg
-            font-light
-            tracking-wide
-            mb-12
-          "
-        >
-          Twoje ECHO dotarło. Ta wiadomość czekała właśnie na ten moment.
+        <p className="text-gray-400 text-center max-w-xl text-lg leading-relaxed font-light">
+          Twoje ECHO dotarło.
+          <br />
+          Ta wiadomość czekała właśnie na ten moment.
         </p>
 
         {message.dedication && (
