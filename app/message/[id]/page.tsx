@@ -39,12 +39,12 @@ export default async function MessagePage({
         <h1
           className="
             font-[var(--font-cormorant)]
-            text-4xl
+            text-5xl
             md:text-7xl
             font-light
-            leading-tight
+            leading-none
             text-white
-            mb-6
+            mb-8
           "
         >
           Echo właśnie dotarło.
