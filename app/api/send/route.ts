@@ -159,7 +159,66 @@ export async function POST() {
           </div>
         `,
       });
+if (message.sender_email) {
+  await resend.emails.send({
+    from: "Echoria <kontakt@echoria.pl>",
+    to: message.sender_email,
 
+    subject: message.recipient_name
+      ? `Twoje ECHO właśnie dotarło do ${message.recipient_name} 💌`
+      : "Twoje ECHO właśnie dotarło 💌",
+
+    html: `
+      <div style="
+        background:#000;
+        color:#fff;
+        padding:40px;
+        text-align:center;
+        font-family:Arial,sans-serif;
+      ">
+        <img
+          src="https://app.echoria.pl/logo2.png"
+          alt="Echoria"
+          style="
+            width:180px;
+            display:block;
+            margin:0 auto 30px auto;
+          "
+        />
+
+        <h1 style="
+          font-family:Georgia,serif;
+          font-size:34px;
+          font-weight:300;
+          line-height:1.2;
+          margin-bottom:20px;
+        ">
+          ${
+            message.recipient_name
+              ? `Twoje ECHO właśnie dotarło do ${message.recipient_name}`
+              : "Twoje ECHO właśnie dotarło"
+          }
+        </h1>
+
+        <p style="
+          color:#8f95ab;
+          font-size:18px;
+          line-height:1.7;
+        ">
+          Twoja wiadomość została dostarczona zgodnie z planem.
+        </p>
+
+        <p style="
+          margin-top:40px;
+          color:#6b7280;
+          font-size:13px;
+        ">
+          Dziękujemy za skorzystanie z Echoria.
+        </p>
+      </div>
+    `,
+  });
+}
       await supabase
         .from("messages")
         .update({ status: "sent" })

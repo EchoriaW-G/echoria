@@ -16,6 +16,7 @@ export default function Home() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [dedication, setDedication] = useState("");
   const [senderName, setSenderName] = useState("");
+  const [senderEmail, setSenderEmail] = useState("");
 
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
@@ -32,6 +33,8 @@ export default function Home() {
 
   const canContinueToDelivery =
   senderName.trim() !== "" &&
+  senderEmail.trim() !== "" &&
+  isValidEmail(senderEmail) &&
   recipientName.trim() !== "" &&
   recipientEmail.trim() !== "" &&
   isValidEmail(recipientEmail);
@@ -157,12 +160,13 @@ export default function Home() {
         .from("messages")
         .insert({
   sender_name: senderName,
+  sender_email: senderEmail,
   recipient_name: recipientName,
   recipient_email: recipientEmail,
   dedication,
-          delivery_date: buildDeliveryTimestamp(),
-          audio_url: uploadedAudioUrl,
-          status: "pending",
+  delivery_date: buildDeliveryTimestamp(),
+  audio_url: uploadedAudioUrl,
+  status: "pending",
         })
         .select()
         .single();
@@ -305,21 +309,22 @@ export default function Home() {
   onChange={(e) => setSenderName(e.target.value)}
   className="p-4 rounded-2xl bg-white text-black"
 />
-          <input
-            type="text"
-            placeholder="Imię odbiorcy"
-            value={recipientName}
-            onChange={(e) => setRecipientName(e.target.value)}
-            className="p-4 rounded-2xl bg-white text-black"
-          />
 
-          <input
-            type="email"
-            placeholder="Adres e-mail odbiorcy"
-            value={recipientEmail}
-            onChange={(e) => setRecipientEmail(e.target.value)}
-            className="p-4 rounded-2xl bg-white text-black"
-          />
+<input
+  type="email"
+  placeholder="Twój e-mail"
+  value={senderEmail}
+  onChange={(e) => setSenderEmail(e.target.value)}
+  className="p-4 rounded-2xl bg-white text-black"
+/>
+
+<input
+  type="text"
+  placeholder="Imię odbiorcy"
+  value={recipientName}
+  onChange={(e) => setRecipientName(e.target.value)}
+  className="p-4 rounded-2xl bg-white text-black"
+/>
 
           <textarea
             placeholder="Dodaj dedykację (opcjonalnie)..."
