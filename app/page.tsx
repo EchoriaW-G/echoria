@@ -326,12 +326,20 @@ export default function Home() {
   className="p-4 rounded-2xl bg-white text-black"
 />
 
-          <textarea
-            placeholder="Dodaj dedykację (opcjonalnie)..."
-            value={dedication}
-            onChange={(e) => setDedication(e.target.value)}
-            className="p-4 rounded-2xl bg-white text-black min-h-[120px]"
-          />
+<input
+  type="email"
+  placeholder="E-mail odbiorcy"
+  value={recipientEmail}
+  onChange={(e) => setRecipientEmail(e.target.value)}
+  className="p-4 rounded-2xl bg-white text-black"
+/>
+
+<textarea
+  placeholder="Dodaj dedykację (opcjonalnie)..."
+  value={dedication}
+  onChange={(e) => setDedication(e.target.value)}
+  className="p-4 rounded-2xl bg-white text-black min-h-[120px]"
+/>
 
           {!isValidEmail(recipientEmail) && recipientEmail.length > 0 && (
             <p className="text-red-400 text-sm">
