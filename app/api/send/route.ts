@@ -36,26 +36,70 @@ export async function POST() {
       await resend.emails.send({
         from: "kontakt@echoria.pl",
         to: message.recipient_email,
-        subject: "Masz wiadomość od Echoria 💌",
+
+        subject: message.sender_name
+          ? `${message.sender_name} przesyła Ci Echo 💌`
+          : "Twoje Echo właśnie dotarło 💌",
+
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background: #000; color: #fff; text-align: center;">
-            <p style="letter-spacing: 0.3em; font-size: 12px; color: #888;">
+          <div style="
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #000;
+            color: #fff;
+            text-align: center;
+          ">
+
+            <p style="
+              letter-spacing: 0.3em;
+              font-size: 12px;
+              color: #888;
+            ">
               ECHORIA
             </p>
 
-            <h1 style="font-size: 36px; margin: 20px 0;">
-              Masz wiadomość 💌
+            <h1 style="
+              font-size: 36px;
+              margin: 20px 0;
+              color: #fff;
+            ">
+              ${
+                message.sender_name
+                  ? `${message.sender_name} przesyła Ci Echo 💌`
+                  : "Masz wiadomość 💌"
+              }
             </h1>
+
+            <p style="
+              color:#9ca3af;
+              font-size:18px;
+              line-height:1.7;
+              margin:0 auto 30px auto;
+            ">
+              Ta wiadomość czekała właśnie na ten moment.
+            </p>
 
             ${
               message.dedication
                 ? `
-              <div style="background: rgba(255,255,255,0.06); padding: 24px; border-radius: 16px; margin: 24px 0;">
-                <p style="font-style: italic; color: #ddd; font-size: 18px;">
-                  "${message.dedication}"
-                </p>
-              </div>
-            `
+                  <div style="
+                    background: rgba(255,255,255,0.06);
+                    padding: 24px;
+                    border-radius: 16px;
+                    margin: 24px 0;
+                  ">
+                    <p style="
+                      font-style: italic;
+                      color: #ddd;
+                      font-size: 18px;
+                      margin:0;
+                    ">
+                      "${message.dedication}"
+                    </p>
+                  </div>
+                `
                 : ""
             }
 
@@ -75,9 +119,14 @@ export async function POST() {
               Otwórz wiadomość
             </a>
 
-            <p style="margin-top:40px; font-size:12px; color:#666;">
+            <p style="
+              margin-top:40px;
+              font-size:12px;
+              color:#666;
+            ">
               Dostarczone przez Echoria
             </p>
+
           </div>
         `,
       });
