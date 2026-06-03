@@ -28,30 +28,65 @@ export default async function MessagePage({
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="max-w-xl w-full text-center flex flex-col gap-6">
-        <p className="text-sm uppercase tracking-[0.3em] text-gray-500">
-          ECHORIA
-        </p>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 py-12">
+      <div className="max-w-4xl w-full text-center">
 
-        <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-          Masz wiadomość 💌
+        <img
+          src="/logo2.png"
+          alt="Echoria"
+          className="w-[280px] md:w-[420px] mx-auto mb-12"
+        />
+
+        <h1
+          className="
+            font-[var(--font-cormorant)]
+            text-5xl
+            md:text-8xl
+            font-light
+            leading-none
+            text-white
+            mb-8
+          "
+        >
+          Echo właśnie dotarło.
         </h1>
 
+        <p className="text-gray-400 text-xl md:text-2xl mb-12">
+          Ta wiadomość czekała właśnie na ten moment.
+        </p>
+
         {message.dedication && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-            <p className="text-gray-300 italic text-lg">
-              “{message.dedication}”
-            </p>
+          <div className="max-w-3xl mx-auto mb-12">
+            <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-10">
+              <p
+                className="
+                  font-[var(--font-cormorant)]
+                  text-3xl
+                  md:text-4xl
+                  italic
+                  text-gray-200
+                "
+              >
+                „{message.dedication}”
+              </p>
+            </div>
           </div>
         )}
 
-        <audio controls src={message.audio_url} className="w-full" />
+        <div className="max-w-3xl mx-auto mb-12">
+          <audio
+            controls
+            src={message.audio_url}
+            className="w-full"
+          />
+        </div>
 
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-sm tracking-wider">
           Dostarczone przez Echoria
         </p>
+
       </div>
     </main>
   );
 }
+
