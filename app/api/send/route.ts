@@ -38,95 +38,121 @@ export async function POST() {
         to: message.recipient_email,
 
         subject: message.sender_name
-          ? `${message.sender_name} przesyła Ci Echo 💌`
-          : "Twoje Echo właśnie dotarło 💌",
+          ? `${message.sender_name} przesyła Ci Echo`
+          : "Masz wiadomość od Echoria",
 
         html: `
-          <div style="
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 40px;
-            background: #000;
-            color: #fff;
-            text-align: center;
-          ">
-
-            <p style="
-              letter-spacing: 0.3em;
-              font-size: 12px;
-              color: #888;
-            ">
-              ECHORIA
-            </p>
-
-            <h1 style="
-              font-size: 36px;
-              margin: 20px 0;
-              color: #fff;
-            ">
-              ${
-                message.sender_name
-                  ? `${message.sender_name} przesyła Ci Echo 💌`
-                  : "Masz wiadomość 💌"
-              }
-            </h1>
-
-            <p style="
-              color:#9ca3af;
-              font-size:18px;
-              line-height:1.7;
-              margin:0 auto 30px auto;
-            ">
-              Ta wiadomość czekała właśnie na ten moment.
-            </p>
-
-            ${
-              message.dedication
-                ? `
-                  <div style="
-                    background: rgba(255,255,255,0.06);
-                    padding: 24px;
-                    border-radius: 16px;
-                    margin: 24px 0;
-                  ">
-                    <p style="
-                      font-style: italic;
-                      color: #ddd;
-                      font-size: 18px;
-                      margin:0;
-                    ">
-                      "${message.dedication}"
-                    </p>
-                  </div>
-                `
-                : ""
-            }
-
-            <a
-              href="https://app.echoria.pl/message/${message.id}"
+          <div
+            style="
+              background:#000000;
+              padding:60px 20px;
+              text-align:center;
+              font-family:Arial,sans-serif;
+            "
+          >
+            <div
               style="
-                display:inline-block;
-                margin-top:24px;
-                padding:16px 28px;
-                background:#fff;
-                color:#000;
-                text-decoration:none;
-                border-radius:12px;
-                font-weight:bold;
+                max-width:700px;
+                margin:0 auto;
               "
             >
-              Otwórz wiadomość
-            </a>
 
-            <p style="
-              margin-top:40px;
-              font-size:12px;
-              color:#666;
-            ">
-              Dostarczone przez Echoria
-            </p>
+              <img
+                src="https://app.echoria.pl/logo2.png"
+                alt="Echoria"
+                style="
+                  width:260px;
+                  max-width:80%;
+                  display:block;
+                  margin:0 auto 50px auto;
+                "
+              />
 
+              <h1
+                style="
+                  margin:0 0 24px 0;
+                  color:#ffffff;
+                  font-family:Georgia,serif;
+                  font-size:64px;
+                  font-weight:300;
+                  line-height:1.1;
+                "
+              >
+                ${
+                  message.sender_name
+                    ? `${message.sender_name} przesyła Ci Echo`
+                    : "Masz wiadomość"
+                }
+              </h1>
+
+              <p
+                style="
+                  color:#8f95ab;
+                  font-size:22px;
+                  line-height:1.8;
+                  margin:0 auto 50px auto;
+                "
+              >
+                Ta wiadomość czekała właśnie na ten moment.
+              </p>
+
+              ${
+                message.dedication
+                  ? `
+                    <div
+                      style="
+                        background:#050505;
+                        border:1px solid rgba(255,255,255,.08);
+                        border-radius:28px;
+                        padding:36px;
+                        margin:40px 0;
+                      "
+                    >
+                      <p
+                        style="
+                          margin:0;
+                          color:#e5e7eb;
+                          font-size:32px;
+                          line-height:1.6;
+                          font-style:italic;
+                          font-family:Georgia,serif;
+                        "
+                      >
+                        "${message.dedication}"
+                      </p>
+                    </div>
+                  `
+                  : ""
+              }
+
+              <a
+                href="https://app.echoria.pl/message/${message.id}"
+                style="
+                  display:inline-block;
+                  margin-top:20px;
+                  padding:20px 42px;
+                  background:#ffffff;
+                  color:#000000;
+                  text-decoration:none;
+                  border-radius:18px;
+                  font-size:20px;
+                  font-weight:600;
+                "
+              >
+                Otwórz wiadomość
+              </a>
+
+              <p
+                style="
+                  margin-top:60px;
+                  color:#6b7280;
+                  font-size:14px;
+                "
+              >
+                Dostarczone przez Echoria
+              </p>
+
+            </div>
           </div>
         `,
       });
