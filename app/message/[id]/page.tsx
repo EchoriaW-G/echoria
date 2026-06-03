@@ -34,35 +34,35 @@ export default async function MessagePage({
         <img
           src="/logo2.png"
           alt="Echoria"
-          className="w-[280px] md:w-[420px] mx-auto mb-12"
+          className="w-[220px] md:w-[320px] mx-auto mb-10"
         />
 
         <h1
           className="
             font-[var(--font-cormorant)]
-            text-5xl
-            md:text-8xl
+            text-4xl
+            md:text-7xl
             font-light
-            leading-none
+            leading-tight
             text-white
-            mb-8
+            mb-6
           "
         >
           Echo właśnie dotarło.
         </h1>
 
-        <p className="text-gray-400 text-xl md:text-2xl mb-12">
+        <p className="text-gray-400 text-lg md:text-xl mb-12">
           Ta wiadomość czekała właśnie na ten moment.
         </p>
 
         {message.dedication && (
           <div className="max-w-3xl mx-auto mb-12">
-            <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-10">
+            <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 md:p-10">
               <p
                 className="
                   font-[var(--font-cormorant)]
-                  text-3xl
-                  md:text-4xl
+                  text-2xl
+                  md:text-3xl
                   italic
                   text-gray-200
                 "
@@ -89,4 +89,3 @@ export default async function MessagePage({
     </main>
   );
 }
-
