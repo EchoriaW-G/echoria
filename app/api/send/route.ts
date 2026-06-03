@@ -34,25 +34,25 @@ export async function POST() {
 
     for (const message of messages) {
       await resend.emails.send({
-        from: "kontakt@echoria.pl",
+        from: "Echoria <kontakt@echoria.pl>",
         to: message.recipient_email,
 
         subject: message.sender_name
-          ? `${message.sender_name} przesyła Ci Echo`
+          ? `${message.sender_name} przesyła Ci Echo 💌`
           : "Masz wiadomość od Echoria",
 
         html: `
           <div
             style="
               background:#000000;
-              padding:60px 20px;
+              padding:40px 16px;
               text-align:center;
               font-family:Arial,sans-serif;
             "
           >
             <div
               style="
-                max-width:700px;
+                max-width:640px;
                 margin:0 auto;
               "
             >
@@ -61,21 +61,21 @@ export async function POST() {
                 src="https://app.echoria.pl/logo2.png"
                 alt="Echoria"
                 style="
-                  width:260px;
+                  width:180px;
                   max-width:80%;
                   display:block;
-                  margin:0 auto 50px auto;
+                  margin:0 auto 30px auto;
                 "
               />
 
               <h1
                 style="
-                  margin:0 0 24px 0;
+                  margin:0 0 20px 0;
                   color:#ffffff;
                   font-family:Georgia,serif;
-                  font-size:64px;
+                  font-size:34px;
                   font-weight:300;
-                  line-height:1.1;
+                  line-height:1.15;
                 "
               >
                 ${
@@ -88,9 +88,9 @@ export async function POST() {
               <p
                 style="
                   color:#8f95ab;
-                  font-size:22px;
-                  line-height:1.8;
-                  margin:0 auto 50px auto;
+                  font-size:18px;
+                  line-height:1.7;
+                  margin:0 auto 30px auto;
                 "
               >
                 Ta wiadomość czekała właśnie na ten moment.
@@ -103,17 +103,17 @@ export async function POST() {
                       style="
                         background:#050505;
                         border:1px solid rgba(255,255,255,.08);
-                        border-radius:28px;
-                        padding:36px;
-                        margin:40px 0;
+                        border-radius:24px;
+                        padding:24px;
+                        margin:24px 0;
                       "
                     >
                       <p
                         style="
                           margin:0;
                           color:#e5e7eb;
-                          font-size:32px;
-                          line-height:1.6;
+                          font-size:24px;
+                          line-height:1.5;
                           font-style:italic;
                           font-family:Georgia,serif;
                         "
@@ -128,14 +128,17 @@ export async function POST() {
               <a
                 href="https://app.echoria.pl/message/${message.id}"
                 style="
-                  display:inline-block;
-                  margin-top:20px;
-                  padding:20px 42px;
+                  display:block;
+                  width:100%;
+                  max-width:320px;
+                  box-sizing:border-box;
+                  margin:30px auto 0 auto;
+                  padding:18px 24px;
                   background:#ffffff;
                   color:#000000;
                   text-decoration:none;
                   border-radius:18px;
-                  font-size:20px;
+                  font-size:18px;
                   font-weight:600;
                 "
               >
@@ -144,9 +147,9 @@ export async function POST() {
 
               <p
                 style="
-                  margin-top:60px;
+                  margin-top:40px;
                   color:#6b7280;
-                  font-size:14px;
+                  font-size:13px;
                 "
               >
                 Dostarczone przez Echoria
