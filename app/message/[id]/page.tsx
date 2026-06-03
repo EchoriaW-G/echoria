@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
+import AudioPlayer from "@/app/components/AudioPlayer";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,11 +62,7 @@ export default async function MessagePage({
         )}
 
         <div className="max-w-3xl mx-auto mb-12">
-          <audio
-            controls
-            src={message.audio_url}
-            className="w-full"
-          />
+          <AudioPlayer src={message.audio_url} />
         </div>
 
         <p className="text-gray-500 text-sm tracking-wider">
