@@ -67,9 +67,32 @@ export default async function MessagePage({
           <AudioPlayer src={message.audio_url} />
         </div>
 
-        <p className="text-gray-500 text-sm tracking-wider">
-          Dostarczone przez Echoria
-        </p>
+        <div className="flex flex-col items-center gap-6">
+  <p className="text-gray-500 text-sm tracking-wider">
+    Dostarczone przez Echoria
+  </p>
+<p className="text-gray-400 text-sm max-w-md text-center">
+  Każdy moment może stać się wspomnieniem.
+  Nagraj wiadomość, która wybrzmi we właściwym czasie.
+</p>
+  <a
+    href="https://app.echoria.pl"
+    className="
+      inline-block
+      px-8
+      py-3
+      bg-white
+      text-black
+      rounded-2xl
+      font-medium
+      tracking-wide
+      hover:opacity-90
+      transition
+    "
+  >
+    Stwórz własne ECHO
+  </a>
+</div>
       </div>
     </main>
   );
