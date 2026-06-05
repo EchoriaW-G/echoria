@@ -71,10 +71,7 @@ export default async function MessagePage({
   <p className="text-gray-500 text-sm tracking-wider">
     Dostarczone przez Echoria
   </p>
-<p className="text-gray-400 text-sm max-w-md text-center">
-  Każdy moment może stać się wspomnieniem.
-  Nagraj wiadomość, która wybrzmi we właściwym czasie.
-</p>
+
   <a
     href="https://app.echoria.pl"
     className="
