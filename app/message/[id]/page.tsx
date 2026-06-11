@@ -66,54 +66,37 @@ export default async function MessagePage({
         <div className="max-w-3xl mx-auto mb-12">
           <AudioPlayer src={message.audio_url} />
         </div>
-        <div className="max-w-xl mx-auto mt-10">
-  <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8">
-    <p className="text-2xl mb-3">
-      💌 Zachowaj Echo na zawsze
-    </p>
-
-    <p className="text-gray-400 leading-relaxed mb-6">
-      Niektóre wiadomości warto mieć przy sobie na zawsze.
-      Pobierz nagranie i przechowuj je na swoim urządzeniu.
-    </p>
-
-    <button
-      className="
-        bg-white
-        text-black
-        px-8
-        py-3
-        rounded-2xl
-        font-medium
-      "
-    >
-      Zachowaj za 5,99 zł
-    </button>
-  </div>
-</div>
-
-        <div className="flex flex-col items-center gap-6">
-  <p className="text-gray-500 text-sm tracking-wider">
-    Dostarczone przez Echoria
+        <div className="max-w-xl mx-auto mt-10 text-center">
+  <p
+    className="
+      font-[var(--font-cormorant)]
+      text-3xl
+      md:text-4xl
+      text-white
+      mb-3
+    "
+  >
+    Zachowaj Echo
   </p>
 
-  <a
-    href="https://app.echoria.pl"
+  <p className="text-gray-400 leading-relaxed mb-6">
+    Bo niektóre wiadomości warto zatrzymać na zawsze.
+  </p>
+
+  <button
     className="
-      inline-block
-      px-8
-      py-3
       bg-white
       text-black
+      px-8
+      py-3
       rounded-2xl
       font-medium
-      tracking-wide
       hover:opacity-90
       transition
     "
   >
-    Stwórz własne ECHO
-  </a>
+    Pobierz nagranie
+  </button>
 </div>
       </div>
     </main>
