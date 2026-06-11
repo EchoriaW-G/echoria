@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "pln",
             product_data: {
-              name: "Zachowaj Echo na zawsze",
+              name: "Zachowaj Echo",
             },
             unit_amount: 599,
           },

@@ -39,7 +39,7 @@ export default function DownloadButton({
         transition
       "
     >
-      Zachowaj za 5,99 zł
+      Pobierz nagranie
     </button>
   );
 }
