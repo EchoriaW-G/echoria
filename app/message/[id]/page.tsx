@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import AudioPlayer from "@/app/components/AudioPlayer";
+import DownloadButton from "@/app/components/DownloadButton";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -83,8 +84,12 @@ export default async function MessagePage({
     Bo niektóre wiadomości warto zatrzymać na zawsze.
   </p>
 
-  <button
+  {message.download_unlocked ? (
+  <a
+    href={message.audio_url}
+    download
     className="
+      inline-block
       bg-white
       text-black
       px-8
@@ -95,8 +100,11 @@ export default async function MessagePage({
       transition
     "
   >
-    Pobierz nagranie
-  </button>
+    Pobierz swoje Echo
+  </a>
+) : (
+  <DownloadButton messageId={message.id} />
+)}
 </div>
       </div>
     </main>

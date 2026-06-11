@@ -36,17 +36,27 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+  const session = event.data.object as Stripe.Checkout.Session;
 
-    const messageId = session.metadata?.messageId;
+  const messageId = session.metadata?.messageId;
+  const type = session.metadata?.type;
 
-    if (messageId) {
-      await supabase
-        .from("messages")
-        .update({ status: "paid" })
-        .eq("id", messageId);
-    }
+  if (!messageId) {
+    return NextResponse.json({ received: true });
   }
+
+  if (type === "download") {
+    await supabase
+      .from("messages")
+      .update({ download_unlocked: true })
+      .eq("id", messageId);
+  } else {
+    await supabase
+      .from("messages")
+      .update({ status: "paid" })
+      .eq("id", messageId);
+  }
+}
 
   return NextResponse.json({ received: true });
 }
