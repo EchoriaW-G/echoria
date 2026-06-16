@@ -39,7 +39,7 @@ export default function DownloadButton({
         transition
       "
     >
-      Pobierz nagranie
+      Wykup nagranie
     </button>
   );
 }

@@ -99,7 +99,7 @@ export default async function MessagePage({
     transition
   "
 >
-  Twoje Echo
+  Pobierz nagranie
 </a>
 ) : (
   <DownloadButton messageId={message.id} />
