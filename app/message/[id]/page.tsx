@@ -86,22 +86,21 @@ export default async function MessagePage({
 
   {message.download_unlocked ? (
   <a
-    href={message.audio_url}
-    download
-    className="
-      inline-block
-      bg-white
-      text-black
-      px-8
-      py-3
-      rounded-2xl
-      font-medium
-      hover:opacity-90
-      transition
-    "
-  >
-    Pobierz swoje Echo
-  </a>
+  href={`/api/download/${message.id}`}
+  className="
+    inline-block
+    bg-white
+    text-black
+    px-8
+    py-3
+    rounded-2xl
+    font-medium
+    hover:opacity-90
+    transition
+  "
+>
+  Twoje Echo
+</a>
 ) : (
   <DownloadButton messageId={message.id} />
 )}
