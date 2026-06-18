@@ -224,23 +224,30 @@ if (
   message.sms_notification &&
   message.recipient_phone
 ) {
-  await fetch(
+  const smsResponse = await fetch(
     "https://api.smsapi.pl/sms.do",
     {
       method: "POST",
       headers: {
         Authorization: `Bearer ${SMSAPI_TOKEN}`,
+        Accept: "application/json",
         "Content-Type":
-          "application/x-www-form-urlencoded",
+          "application/x-www-form-urlencoded; charset=UTF-8",
       },
       body: new URLSearchParams({
-        to: message.recipient_phone,
+        to: message.recipient_phone.replace("+", ""),
         message: message.sender_name
-  ? `${message.sender_name} przesyla Ci Echo. Sprawdz skrzynke mailowa.`
-  : "Masz nowe Echo. Sprawdz skrzynke mailowa.",
+          ? `${message.sender_name} przesyła Ci Echo. Sprawdź swoją skrzynkę e-mail.`
+          : "Masz nowe Echo. Sprawdź swoją skrzynkę e-mail.",
+        encoding: "utf-8",
         format: "json",
       }),
     }
+  );
+
+  console.log(
+    "SMSAPI RESPONSE:",
+    await smsResponse.text()
   );
 }
       await supabase
