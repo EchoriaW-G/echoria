@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+const SMSAPI_TOKEN = process.env.SMSAPI_TOKEN!;
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -218,6 +219,29 @@ if (message.sender_email) {
       </div>
     `,
   });
+}
+if (
+  message.sms_notification &&
+  message.recipient_phone
+) {
+  await fetch(
+    "https://api.smsapi.pl/sms.do",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${SMSAPI_TOKEN}`,
+        "Content-Type":
+          "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        to: message.recipient_phone,
+        message: message.sender_name
+  ? `💌 ${message.sender_name} przesyła Ci Echo. Sprawdź swoją skrzynkę mailową.`
+  : "💌 Masz nowe Echo. Sprawdź swoją skrzynkę e-mail.",
+        format: "json",
+      }),
+    }
+  );
 }
       await supabase
         .from("messages")

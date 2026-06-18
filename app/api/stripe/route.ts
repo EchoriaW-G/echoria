@@ -1,11 +1,34 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
     const { messageId } = await req.json();
+
+    const { data: message, error } = await supabase
+      .from("messages")
+      .select("sms_notification")
+      .eq("id", messageId)
+      .single();
+
+    if (error || !message) {
+      return NextResponse.json(
+        { error: "Message not found" },
+        { status: 404 }
+      );
+    }
+
+    const amount = message.sms_notification
+      ? 4099
+      : 3900;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -16,9 +39,11 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "pln",
             product_data: {
-              name: "Echo - Personalizowana Wiadomość Audio od Echorii",
+              name: message.sms_notification
+                ? "Echo + Powiadomienie SMS"
+                : "Echo - Personalizowana Wiadomość Audio od Echorii",
             },
-            unit_amount: 3900,
+            unit_amount: amount,
           },
           quantity: 1,
         },

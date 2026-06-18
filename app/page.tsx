@@ -16,6 +16,8 @@ export default function Home() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [dedication, setDedication] = useState("");
   const [senderName, setSenderName] = useState("");
+  const [smsNotification, setSmsNotification] = useState(false);
+const [recipientPhone, setRecipientPhone] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
 
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -30,6 +32,8 @@ export default function Home() {
   const mimeTypeRef = useRef<string>("audio/webm");
 
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+  const isValidPhone = (phone: string) =>
+  /^\+?[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
 
   const canContinueToDelivery =
   senderName.trim() !== "" &&
@@ -37,7 +41,11 @@ export default function Home() {
   isValidEmail(senderEmail) &&
   recipientName.trim() !== "" &&
   recipientEmail.trim() !== "" &&
-  isValidEmail(recipientEmail);
+  isValidEmail(recipientEmail) &&
+  (
+    !smsNotification ||
+    (recipientPhone.trim() !== "" && isValidPhone(recipientPhone))
+  );
 
   const canProceedToPayment =
     deliveryDate !== "" &&
@@ -163,11 +171,15 @@ export default function Home() {
   sender_email: senderEmail,
   recipient_name: recipientName,
   recipient_email: recipientEmail,
+
+  recipient_phone: recipientPhone,
+  sms_notification: smsNotification,
+
   dedication,
   delivery_date: buildDeliveryTimestamp(),
   audio_url: uploadedAudioUrl,
   status: "pending",
-        })
+})
         .select()
         .single();
 
@@ -333,6 +345,26 @@ export default function Home() {
   onChange={(e) => setRecipientEmail(e.target.value)}
   className="p-4 rounded-2xl bg-white text-black"
 />
+<label className="flex gap-3 items-center text-sm text-gray-300">
+  <input
+    type="checkbox"
+    checked={smsNotification}
+    onChange={(e) => setSmsNotification(e.target.checked)}
+  />
+
+  <span>
+    Dodatkowe powiadomienie SMS (+1,99 zł)
+  </span>
+</label>
+{smsNotification && (
+  <input
+    type="tel"
+    placeholder="Numer telefonu odbiorcy"
+    value={recipientPhone}
+    onChange={(e) => setRecipientPhone(e.target.value)}
+    className="p-4 rounded-2xl bg-white text-black"
+  />
+)}
 
 <textarea
   placeholder="Dodaj dedykację (opcjonalnie)..."
@@ -346,6 +378,13 @@ export default function Home() {
               Podaj poprawny adres e-mail.
             </p>
           )}
+          {smsNotification &&
+  recipientPhone.length > 0 &&
+  !isValidPhone(recipientPhone) && (
+    <p className="text-red-400 text-sm">
+      Podaj poprawny numer telefonu.
+    </p>
+)}
 
           <button
             onClick={() => setStep("delivery")}
