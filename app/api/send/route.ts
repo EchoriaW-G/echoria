@@ -143,7 +143,7 @@ export async function POST() {
                   font-weight:600;
                 "
               >
-                Otwórz wiadomość
+                Odsłuchaj wiadomość
               </a>
 
               <p
@@ -236,8 +236,8 @@ if (
       body: new URLSearchParams({
         to: message.recipient_phone,
         message: message.sender_name
-  ? `💌 ${message.sender_name} przesyła Ci Echo. Sprawdź swoją skrzynkę mailową.`
-  : "💌 Masz nowe Echo. Sprawdź swoją skrzynkę e-mail.",
+  ? `${message.sender_name} przesyla Ci Echo. Sprawdz skrzynke mailowa.`
+  : "Masz nowe Echo. Sprawdz skrzynke mailowa.",
         format: "json",
       }),
     }

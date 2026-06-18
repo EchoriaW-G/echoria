@@ -283,7 +283,7 @@ const [recipientPhone, setRecipientPhone] = useState("");
                 onChange={(e) => setConfirmRecipientConsent(e.target.checked)}
               />
               <span>
-                Potwierdzam, że mam prawo podać adres e-mail odbiorcy.
+                Potwierdzam, że mam prawo podać adres e-mail odbiorcy oraz numer telefonu (w przypadku powiadomienia SMS).
               </span>
             </label>
           </div>
@@ -345,16 +345,23 @@ const [recipientPhone, setRecipientPhone] = useState("");
   onChange={(e) => setRecipientEmail(e.target.value)}
   className="p-4 rounded-2xl bg-white text-black"
 />
-<label className="flex gap-3 items-center text-sm text-gray-300">
+<label className="flex gap-3 items-start">
   <input
     type="checkbox"
     checked={smsNotification}
     onChange={(e) => setSmsNotification(e.target.checked)}
+    className="mt-1"
   />
 
-  <span>
-    Dodatkowe powiadomienie SMS (+1,99 zł)
-  </span>
+  <div>
+    <p className="text-sm text-gray-300">
+      Nie pozwól, by odbiorca przeoczył Echo (+1,99 zł)
+    </p>
+
+    <p className="text-xs text-gray-500 mt-1">
+      Odbiorca otrzyma krótkie powiadomienie SMS w momencie dostarczenia wiadomości.
+    </p>
+  </div>
 </label>
 {smsNotification && (
   <input
