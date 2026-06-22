@@ -19,6 +19,7 @@ export default function Home() {
   const [smsNotification, setSmsNotification] = useState(false);
 const [recipientPhone, setRecipientPhone] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
 
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
@@ -174,6 +175,8 @@ const [recipientPhone, setRecipientPhone] = useState("");
 
   recipient_phone: recipientPhone,
   sms_notification: smsNotification,
+
+  discount_code: discountCode,
 
   dedication,
   delivery_date: buildDeliveryTimestamp(),
@@ -372,6 +375,14 @@ const [recipientPhone, setRecipientPhone] = useState("");
     className="p-4 rounded-2xl bg-white text-black"
   />
 )}
+
+<input
+  type="text"
+  placeholder="Kod rabatowy (opcjonalnie)"
+  value={discountCode}
+  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+  className="p-4 rounded-2xl bg-white text-black"
+/>
 
 <textarea
   placeholder="Dodaj dedykację (opcjonalnie)..."

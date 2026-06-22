@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const { data: message, error } = await supabase
       .from("messages")
-      .select("sms_notification")
+      .select("sms_notification, discount_code")
       .eq("id", messageId)
       .single();
 
@@ -26,9 +26,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const amount = message.sms_notification
-      ? 4099
-      : 3900;
+    let amount = message.sms_notification
+  ? 4099
+  : 3900;
+
+if (
+  message.discount_code?.trim().toUpperCase() ===
+  "PREMIERA"
+) {
+  amount = 0;
+}
+if (amount === 0) {
+  await supabase
+    .from("messages")
+    .update({ status: "paid" })
+    .eq("id", messageId);
+
+  return NextResponse.json({
+    url: "https://app.echoria.pl/payment-success",
+  });
+}
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
