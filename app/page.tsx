@@ -191,7 +191,9 @@ const [recipientPhone, setRecipientPhone] = useState("");
         setIsSaving(false);
         return;
       }
-
+if (typeof window !== "undefined" && (window as any).ttq) {
+  (window as any).ttq.track("InitiateCheckout");
+}
       const response = await fetch("/api/stripe", {
         method: "POST",
         headers: {

@@ -1,6 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function PaymentSuccessPage() {
+
+  useEffect(() => {
+  (window as any).ttq?.track("Purchase", {
+    value: 39,
+    currency: "PLN",
+  });
+}, []);
+
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 antialiased">
       <div className="max-w-2xl w-full flex flex-col items-center text-center gap-8">
