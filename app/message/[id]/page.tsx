@@ -117,12 +117,10 @@ export default async function MessagePage({
               mb-3
             "
           >
-            Teraz Twoja kolej
+            A komu Ty chcesz powiedzieć coś ważnego?
           </p>
 
           <p className="text-gray-400 leading-relaxed mb-8">
-            Komu chciał(a)byś powiedzieć coś ważnego?
-            <br />
             Nagraj wiadomość i wybierz moment, w którym ma wybrzmieć.
           </p>
 
