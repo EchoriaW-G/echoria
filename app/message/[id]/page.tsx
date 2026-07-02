@@ -117,7 +117,7 @@ export default async function MessagePage({
               mb-3
             "
           >
-            Teraz kolej na Ciebie.
+            Teraz Twoja kolej
           </p>
 
           <p className="text-gray-400 leading-relaxed mb-8">
