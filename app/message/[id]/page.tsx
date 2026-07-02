@@ -39,12 +39,12 @@ export default async function MessagePage({
         />
 
         <p className="text-gray-400 text-center max-w-xl mx-auto text-lg leading-relaxed font-light mb-10">
-  {message.sender_name
-    ? `${message.sender_name} przesyła Ci ECHO`
-    : "Twoje ECHO dotarło."}
-  <br />
-  Ta wiadomość czekała właśnie na ten moment.
-</p>
+          {message.sender_name
+            ? `${message.sender_name} przesyła Ci ECHO`
+            : "Twoje ECHO dotarło."}
+          <br />
+          Ta wiadomość czekała właśnie na ten moment.
+        </p>
 
         {message.dedication && (
           <div className="max-w-3xl mx-auto mb-12">
@@ -67,81 +67,83 @@ export default async function MessagePage({
         <div className="max-w-3xl mx-auto mb-12">
           <AudioPlayer src={message.audio_url} />
         </div>
+
         <div className="max-w-xl mx-auto mt-10 text-center">
-  <p
-    className="
-      font-[var(--font-cormorant)]
-      text-3xl
-      md:text-4xl
-      text-white
-      mb-3
-    "
-  >
-    Zachowaj Echo
-  </p>
+          <p
+            className="
+              font-[var(--font-cormorant)]
+              text-3xl
+              md:text-4xl
+              text-white
+              mb-3
+            "
+          >
+            Zachowaj Echo
+          </p>
 
-  <p className="text-gray-400 leading-relaxed mb-6">
-    Bo niektóre wiadomości warto zatrzymać na zawsze.
-  </p>
+          <p className="text-gray-400 leading-relaxed mb-6">
+            Bo niektóre wiadomości warto zatrzymać na zawsze.
+          </p>
 
-  {message.download_unlocked ? (
-  <a
-  href={`/api/download/${message.id}`}
-  className="
-    inline-block
-    bg-white
-    text-black
-    px-8
-    py-3
-    rounded-2xl
-    font-medium
-    hover:opacity-90
-    transition
-  "
->
-  Pobierz nagranie
-</a>
-) : (
-  <DownloadButton messageId={message.id} />
-)}
-</div>
+          {message.download_unlocked ? (
+            <a
+              href={`/api/download/${message.id}`}
+              className="
+                inline-block
+                bg-white
+                text-black
+                px-8
+                py-3
+                rounded-2xl
+                font-medium
+                hover:opacity-90
+                transition
+              "
+            >
+              Pobierz nagranie
+            </a>
+          ) : (
+            <DownloadButton messageId={message.id} />
+          )}
+        </div>
+
+        <div className="max-w-xl mx-auto mt-16 text-center border-t border-white/10 pt-10">
+          <p
+            className="
+              font-[var(--font-cormorant)]
+              text-3xl
+              md:text-4xl
+              text-white
+              mb-3
+            "
+          >
+            Teraz kolej na Ciebie.
+          </p>
+
+          <p className="text-gray-400 leading-relaxed mb-8">
+            Komu chciał(a)byś powiedzieć coś ważnego?
+            <br />
+            Nagraj wiadomość i wybierz moment, w którym ma wybrzmieć.
+          </p>
+
+          <a
+            href="/"
+            className="
+              inline-block
+              bg-white
+              text-black
+              px-8
+              py-4
+              rounded-2xl
+              font-medium
+              hover:opacity-90
+              transition
+            "
+          >
+            Stwórz własne Echo
+          </a>
+        </div>
       </div>
-      <div className="max-w-xl mx-auto mt-16 text-center border-t border-white/10 pt-10">
-  <p
-    className="
-      font-[var(--font-cormorant)]
-      text-3xl
-      md:text-4xl
-      text-white
-      mb-3
-    "
-  >
-    Teraz kolej na Ciebie.
-  </p>
-
-  <p className="text-gray-400 leading-relaxed mb-8">
-    Komu zechcesz podarować swój głos?
-    <br />
-    Nagraj wiadomość i wybierz moment, w którym ma wybrzmieć.
-  </p>
-
-  <a
-    href="/"
-    className="
-      inline-block
-      bg-white
-      text-black
-      px-8
-      py-4
-      rounded-2xl
-      font-medium
-      hover:opacity-90
-      transition
-    "
-  >
-    Stwórz własne Echo
-  </a>
-</div>
     </main>
   );
 }
