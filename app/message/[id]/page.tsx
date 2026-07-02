@@ -106,6 +106,42 @@ export default async function MessagePage({
 )}
 </div>
       </div>
+      <div className="max-w-xl mx-auto mt-16 text-center border-t border-white/10 pt-10">
+  <p
+    className="
+      font-[var(--font-cormorant)]
+      text-3xl
+      md:text-4xl
+      text-white
+      mb-3
+    "
+  >
+    Teraz kolej na Ciebie.
+  </p>
+
+  <p className="text-gray-400 leading-relaxed mb-8">
+    Komu zechcesz podarować swój głos?
+    <br />
+    Nagraj wiadomość i wybierz moment, w którym ma wybrzmieć.
+  </p>
+
+  <a
+    href="/"
+    className="
+      inline-block
+      bg-white
+      text-black
+      px-8
+      py-4
+      rounded-2xl
+      font-medium
+      hover:opacity-90
+      transition
+    "
+  >
+    Stwórz własne Echo
+  </a>
+</div>
     </main>
   );
 }
