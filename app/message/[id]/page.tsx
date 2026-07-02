@@ -117,11 +117,11 @@ export default async function MessagePage({
               mb-3
             "
           >
-            A komu Ty chcesz powiedzieć coś ważnego?
+            Jeśli ta wiadomość wywołała uśmiech...
           </p>
 
           <p className="text-gray-400 leading-relaxed mb-8">
-            Nagraj wiadomość i wybierz moment, w którym ma wybrzmieć.
+            podaruj go również komuś innemu.
           </p>
 
           <a
