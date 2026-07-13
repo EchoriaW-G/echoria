@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
     }
 
     let amount = message.sms_notification
-  ? 4099
-  : 3900;
+  ? 2099
+  : 1900;
 
 if (
   message.discount_code?.trim().toUpperCase() ===

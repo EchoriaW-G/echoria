@@ -28,6 +28,7 @@ export default function PaymentSuccessPage() {
 
           <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-light">
             Odbiorca otrzyma je w wybranym przez Ciebie momencie.
+<br>Dziękujemy. Stałeś się częścią naszej misji.</br>
           </p>
         </div>
 
