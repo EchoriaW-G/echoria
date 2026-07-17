@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 
 type ProductType = "echo" | "gift" | "frame";
 
@@ -11,14 +10,18 @@ const prices: Record<ProductType, number> = {
   frame: 89,
 };
 
-export default function PaymentSuccessPage() {
-  const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
+function isProductType(value: unknown): value is ProductType {
+  return value === "echo" || value === "gift" || value === "frame";
+}
 
+export default function PaymentSuccessPage() {
   const [productType, setProductType] = useState<ProductType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const sessionId = searchParams.get("session_id");
+
     if (!sessionId) {
       setIsLoading(false);
       return;
@@ -27,40 +30,36 @@ export default function PaymentSuccessPage() {
     async function loadSession() {
       try {
         const response = await fetch(
-          `/api/stripe/session?session_id=${encodeURIComponent(sessionId!)}`,
+          `/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`,
           {
             cache: "no-store",
           }
         );
 
-        const data = await response.json();
-
-        console.log("Dane sesji Stripe:", data);
+        const data: {
+          productType?: unknown;
+          error?: string;
+        } = await response.json();
 
         if (!response.ok) {
           throw new Error(data.error ?? "Nie udało się pobrać sesji.");
         }
 
+        if (!isProductType(data.productType)) {
+          throw new Error("Nieznany lub brakujący typ produktu.");
+        }
+
         const receivedProductType = data.productType;
 
-        if (
-          receivedProductType === "echo" ||
-          receivedProductType === "gift" ||
-          receivedProductType === "frame"
-        ) {
-          setProductType(receivedProductType);
+        setProductType(receivedProductType);
 
-          (window as any).ttq?.track("Purchase", {
-            value: prices[receivedProductType],
-            currency: "PLN",
-            content_name: receivedProductType,
-          });
-        } else {
-          console.error(
-            "Nieznany lub brakujący productType:",
-            receivedProductType
-          );
-        }
+        (window as any).ttq?.track("Purchase", {
+          value: prices[receivedProductType],
+          currency: "PLN",
+          content_name: receivedProductType,
+          content_id: receivedProductType,
+          content_type: "product",
+        });
       } catch (error) {
         console.error("Błąd strony sukcesu:", error);
       } finally {
@@ -69,7 +68,7 @@ export default function PaymentSuccessPage() {
     }
 
     loadSession();
-  }, [sessionId]);
+  }, []);
 
   if (isLoading) {
     return (
