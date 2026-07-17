@@ -3,26 +3,58 @@
 import { useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
+type Step = "record" | "product" | "details";
+type ProductType = "echo" | "gift" | "frame";
+
+const productCopy: Record<
+  ProductType,
+  { name: string; price: string; description: string; badge?: string }
+> = {
+  echo: {
+    name: "Echo",
+    price: "19 zł",
+    description: "Wiadomość dostarczona online w wybranym dniu i godzinie.",
+  },
+  gift: {
+    name: "Echo Gift",
+    price: "49 zł",
+    description: "Elegancka zawieszka z kodem QR, gotowa do wręczenia.",
+    badge: "NOWOŚĆ",
+  },
+  frame: {
+    name: "Echo Frame",
+    price: "89 zł",
+    description: "Personalizowana ramka z kodem QR, gotowa do wręczenia.",
+  },
+};
+
 export default function Home() {
-  const [step, setStep] = useState<"record" | "details" | "delivery">("record");
+  const [step, setStep] = useState<Step>("record");
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string | null>(null);
+  const [productType, setProductType] = useState<ProductType>("echo");
 
+  const [senderName, setSenderName] = useState("");
+  const [senderEmail, setSenderEmail] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [recipientEmail, setRecipientEmail] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState("");
   const [dedication, setDedication] = useState("");
-  const [senderName, setSenderName] = useState("");
-  const [smsNotification, setSmsNotification] = useState(false);
-const [recipientPhone, setRecipientPhone] = useState("");
-  const [senderEmail, setSenderEmail] = useState("");
   const [discountCode, setDiscountCode] = useState("");
+  const [smsNotification, setSmsNotification] = useState(false);
 
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
+
+  const [shippingName, setShippingName] = useState("");
+  const [shippingPhone, setShippingPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [shippingPostcode, setShippingPostcode] = useState("");
+  const [shippingCity, setShippingCity] = useState("");
 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDigitalService, setAcceptDigitalService] = useState(false);
@@ -30,27 +62,37 @@ const [recipientPhone, setRecipientPhone] = useState("");
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const mimeTypeRef = useRef<string>("audio/webm");
+  const mimeTypeRef = useRef("audio/webm");
 
+  const isPhysicalProduct = productType !== "echo";
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
   const isValidPhone = (phone: string) =>
-  /^\+?[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
+    /^\+?[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
 
-  const canContinueToDelivery =
-  senderName.trim() !== "" &&
-  senderEmail.trim() !== "" &&
-  isValidEmail(senderEmail) &&
-  recipientName.trim() !== "" &&
-  recipientEmail.trim() !== "" &&
-  isValidEmail(recipientEmail) &&
-  (
-    !smsNotification ||
-    (recipientPhone.trim() !== "" && isValidPhone(recipientPhone))
-  );
+  const hasValidCommonDetails =
+    senderName.trim() !== "" &&
+    isValidEmail(senderEmail) &&
+    recipientName.trim() !== "";
+
+  const hasValidEchoDetails =
+    productType !== "echo" ||
+    (isValidEmail(recipientEmail) &&
+      deliveryDate !== "" &&
+      deliveryTime !== "" &&
+      (!smsNotification || isValidPhone(recipientPhone)));
+
+  const hasValidShippingDetails =
+    !isPhysicalProduct ||
+    (shippingName.trim() !== "" &&
+      isValidPhone(shippingPhone) &&
+      shippingAddress.trim() !== "" &&
+      shippingPostcode.trim() !== "" &&
+      shippingCity.trim() !== "");
 
   const canProceedToPayment =
-    deliveryDate !== "" &&
-    deliveryTime !== "" &&
+    hasValidCommonDetails &&
+    hasValidEchoDetails &&
+    hasValidShippingDetails &&
     acceptTerms &&
     acceptDigitalService &&
     confirmRecipientConsent &&
@@ -59,84 +101,62 @@ const [recipientPhone, setRecipientPhone] = useState("");
   const buildDeliveryTimestamp = () => {
     const [year, month, day] = deliveryDate.split("-").map(Number);
     const [hours, minutes] = deliveryTime.split(":").map(Number);
-
-    const localDate = new Date(
-      year,
-      month - 1,
-      day,
-      hours,
-      minutes,
-      0
-    );
-
-    return localDate.toISOString();
+    return new Date(year, month - 1, day, hours, minutes, 0).toISOString();
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
       const mimeType = MediaRecorder.isTypeSupported("audio/mp4")
         ? "audio/mp4"
         : "audio/webm";
 
       mimeTypeRef.current = mimeType;
-
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
-
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
 
       mediaRecorder.onstop = async () => {
         setIsUploading(true);
+        stream.getTracks().forEach((track) => track.stop());
 
         try {
           const audioBlob = new Blob(audioChunksRef.current, {
             type: mimeTypeRef.current,
           });
 
-          const localPreviewUrl = URL.createObjectURL(audioBlob);
-          setAudioUrl(localPreviewUrl);
+          if (audioUrl) URL.revokeObjectURL(audioUrl);
+          setAudioUrl(URL.createObjectURL(audioBlob));
 
-          const extension =
-            mimeTypeRef.current === "audio/mp4" ? "mp4" : "webm";
-
+          const extension = mimeTypeRef.current === "audio/mp4" ? "mp4" : "webm";
           const fileName = `recording-${Date.now()}.${extension}`;
 
           const { error } = await supabase.storage
             .from("audio")
-            .upload(fileName, audioBlob, {
-              contentType: mimeTypeRef.current,
-            });
+            .upload(fileName, audioBlob, { contentType: mimeTypeRef.current });
 
           if (error) {
             alert(JSON.stringify(error));
-            setIsUploading(false);
             return;
           }
 
-          const { data } = supabase.storage
-            .from("audio")
-            .getPublicUrl(fileName);
-
+          const { data } = supabase.storage.from("audio").getPublicUrl(fileName);
           setUploadedAudioUrl(data.publicUrl);
-        } catch (err) {
-          alert(String(err));
+        } catch (error) {
+          alert(String(error));
+        } finally {
+          setIsUploading(false);
         }
-
-        setIsUploading(false);
       };
 
       mediaRecorder.start();
       setIsRecording(true);
-    } catch (err) {
-      alert(String(err));
+    } catch (error) {
+      alert(String(error));
     }
   };
 
@@ -146,9 +166,23 @@ const [recipientPhone, setRecipientPhone] = useState("");
   };
 
   const deleteRecording = () => {
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null);
     setUploadedAudioUrl(null);
     setStep("record");
+  };
+
+  const chooseProduct = (product: ProductType) => {
+    setProductType(product);
+
+    if (product !== "echo") {
+      setSmsNotification(false);
+      setRecipientPhone("");
+      setDeliveryDate("");
+      setDeliveryTime("");
+    }
+
+    setStep("details");
   };
 
   const saveMessage = async () => {
@@ -165,42 +199,52 @@ const [recipientPhone, setRecipientPhone] = useState("");
     setIsSaving(true);
 
     try {
-      const { data, error } = await supabase
-        .from("messages")
-        .insert({
-  sender_name: senderName,
-  sender_email: senderEmail,
-  recipient_name: recipientName,
-  recipient_email: recipientEmail,
+      const messageResponse = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderName,
+          senderEmail,
+          recipientName,
+          recipientEmail: productType === "echo" ? recipientEmail : null,
+          recipientPhone:
+            productType === "echo" && smsNotification ? recipientPhone : null,
+          smsNotification:
+            productType === "echo" && smsNotification,
+          discountCode,
+          dedication,
+          deliveryDate:
+            productType === "echo"
+              ? buildDeliveryTimestamp()
+              : null,
+          audioUrl: uploadedAudioUrl,
+          productType,
+          shippingName: isPhysicalProduct ? shippingName : null,
+          shippingPhone: isPhysicalProduct ? shippingPhone : null,
+          shippingAddress: isPhysicalProduct ? shippingAddress : null,
+          shippingPostcode: isPhysicalProduct ? shippingPostcode : null,
+          shippingCity: isPhysicalProduct ? shippingCity : null,
+        }),
+      });
 
-  recipient_phone: recipientPhone,
-  sms_notification: smsNotification,
+      const messageData = await messageResponse.json();
 
-  discount_code: discountCode,
-
-  dedication,
-  delivery_date: buildDeliveryTimestamp(),
-  audio_url: uploadedAudioUrl,
-  status: "pending",
-})
-        .select()
-        .single();
-
-      if (error) {
-        alert(JSON.stringify(error));
-        setIsSaving(false);
+      if (!messageResponse.ok) {
+        alert(messageData.error || "Nie udało się zapisać zamówienia.");
         return;
       }
-if (typeof window !== "undefined" && (window as any).ttq) {
-  (window as any).ttq.track("InitiateCheckout");
-}
+
+      if (typeof window !== "undefined" && (window as any).ttq) {
+        (window as any).ttq.track("InitiateCheckout");
+      }
+
       const response = await fetch("/api/stripe", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messageId: data.id,
+          messageId: messageData.messageId,
+          productType,
+          smsNotification: productType === "echo" && smsNotification,
         }),
       });
 
@@ -211,101 +255,129 @@ if (typeof window !== "undefined" && (window as any).ttq) {
         return;
       }
 
-      alert("Błąd płatności.");
-    } catch (err) {
-      alert(String(err));
+      alert(stripeData.error || "Błąd płatności.");
+    } catch (error) {
+      alert(String(error));
+    } finally {
+      setIsSaving(false);
     }
-
-    setIsSaving(false);
   };
 
-  if (step === "delivery") {
+  const Agreements = () => (
+    <div className="flex flex-col gap-4 text-sm leading-relaxed text-gray-300">
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={acceptTerms}
+          onChange={(event) => setAcceptTerms(event.target.checked)}
+          className="mt-1"
+        />
+        <span>
+          Akceptuję{" "}
+          <a
+            href="https://echoria.pl/index.php/regulamin/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Regulamin
+          </a>{" "}
+          oraz{" "}
+          <a
+            href="https://echoria.pl/index.php/polityka-prywatnosci-2/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Politykę Prywatności
+          </a>
+          .
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={acceptDigitalService}
+          onChange={(event) => setAcceptDigitalService(event.target.checked)}
+          className="mt-1"
+        />
+        <span>
+          {productType === "echo"
+            ? "Rozumiem, że realizacja usługi cyfrowej rozpoczyna się po zakupie."
+            : "Rozumiem, że produkt jest wykonywany ręcznie na zamówienie, a jego wysyłka nastąpi po przygotowaniu zamówienia."}
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={confirmRecipientConsent}
+          onChange={(event) =>
+            setConfirmRecipientConsent(event.target.checked)
+          }
+          className="mt-1"
+        />
+        <span>
+          Potwierdzam, że mam prawo podać dane odbiorcy wykorzystane do
+          realizacji zamówienia.
+        </span>
+      </label>
+    </div>
+  );
+
+  if (step === "product") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-white antialiased px-6">
-        <div className="w-full max-w-md flex flex-col gap-5">
-          <h1 className="text-4xl font-serif font-light tracking-wide">
-            Termin dostarczenia
-          </h1>
-
-          <input
-            type="date"
-            value={deliveryDate}
-            onChange={(e) => setDeliveryDate(e.target.value)}
-            className="p-4 rounded-2xl bg-white text-black"
-          />
-
-          <input
-            type="time"
-            value={deliveryTime}
-            onChange={(e) => setDeliveryTime(e.target.value)}
-            className="p-4 rounded-2xl bg-white text-black"
-          />
-
-          <div className="flex flex-col gap-4 text-sm text-gray-300 leading-relaxed">
-            <label className="flex gap-3 items-start">
-              <input
-                type="checkbox"
-                checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
-              />
-              <span>
-                Akceptuję{" "}
-                <a
-                  href="https://echoria.pl/index.php/regulamin/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Regulamin
-                </a>{" "}
-                oraz{" "}
-                <a
-                  href="https://echoria.pl/index.php/polityka-prywatnosci-2/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Politykę Prywatności
-                </a>.
-              </span>
-            </label>
-
-            <label className="flex gap-3 items-start">
-              <input
-                type="checkbox"
-                checked={acceptDigitalService}
-                onChange={(e) => setAcceptDigitalService(e.target.checked)}
-              />
-              <span>
-                Rozumiem, że realizacja usługi cyfrowej rozpoczyna się po zakupie.
-              </span>
-            </label>
-
-            <label className="flex gap-3 items-start">
-              <input
-                type="checkbox"
-                checked={confirmRecipientConsent}
-                onChange={(e) => setConfirmRecipientConsent(e.target.checked)}
-              />
-              <span>
-                Potwierdzam, że mam prawo podać adres e-mail odbiorcy oraz numer telefonu (w przypadku powiadomienia SMS).
-              </span>
-            </label>
+      <main className="min-h-screen bg-black px-6 py-10 text-white antialiased">
+        <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm uppercase tracking-[0.25em] text-gray-500">
+              Krok 2 z 3
+            </p>
+            <h1 className="text-4xl font-light tracking-wide font-serif">
+              Wybierz sposób wręczenia
+            </h1>
+            <p className="text-sm leading-relaxed text-gray-400">
+              To samo osobiste nagranie możesz wysłać cyfrowo albo zamienić w
+              gotowy do wręczenia prezent.
+            </p>
           </div>
 
-          <button
-            onClick={saveMessage}
-            disabled={!canProceedToPayment}
-            className="px-6 py-3 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
-          >
-            {isSaving ? "Przekierowanie..." : "Przejdź do płatności"}
-          </button>
+          {(Object.keys(productCopy) as ProductType[]).map((product) => {
+            const copy = productCopy[product];
+            return (
+              <button
+                key={product}
+                type="button"
+                onClick={() => chooseProduct(product)}
+                className="relative w-full rounded-2xl border border-white/20 p-5 text-left transition hover:bg-white/5"
+              >
+                {copy.badge && (
+                  <span className="absolute -top-3 right-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-black">
+                    {copy.badge}
+                  </span>
+                )}
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-lg font-medium">{copy.name}</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      {copy.description}
+                    </p>
+                  </div>
+                  <span className="whitespace-nowrap font-medium">
+                    {copy.price}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
 
           <button
-            onClick={() => setStep("details")}
-            className="text-gray-400 text-sm"
+            type="button"
+            onClick={() => setStep("record")}
+            className="text-sm text-gray-400"
           >
-            Wróć
+            Wróć do nagrania
           </button>
         </div>
       </main>
@@ -314,111 +386,200 @@ if (typeof window !== "undefined" && (window as any).ttq) {
 
   if (step === "details") {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-white antialiased px-6">
-        <div className="w-full max-w-md flex flex-col gap-5">
-          <h1 className="text-4xl font-serif font-light tracking-wide">
-            Szczegóły wiadomości
-          </h1>
-<input
-  type="text"
-  placeholder="Twoje imię"
-  value={senderName}
-  onChange={(e) => setSenderName(e.target.value)}
-  className="p-4 rounded-2xl bg-white text-black"
-/>
+      <main className="min-h-screen bg-black px-6 py-10 text-white antialiased">
+        <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm uppercase tracking-[0.25em] text-gray-500">
+              Krok 3 z 3
+            </p>
+            <h1 className="text-4xl font-light tracking-wide font-serif">
+              Szczegóły zamówienia
+            </h1>
+            <p className="text-sm text-gray-400">
+              Wybrany produkt: {productCopy[productType].name} ·{" "}
+              {productCopy[productType].price}
+            </p>
+          </div>
 
-<input
-  type="email"
-  placeholder="Twój e-mail"
-  value={senderEmail}
-  onChange={(e) => setSenderEmail(e.target.value)}
-  className="p-4 rounded-2xl bg-white text-black"
-/>
+          <input
+            type="text"
+            placeholder="Twoje imię"
+            value={senderName}
+            onChange={(event) => setSenderName(event.target.value)}
+            className="rounded-2xl bg-white p-4 text-black"
+          />
 
-<input
-  type="text"
-  placeholder="Imię odbiorcy"
-  value={recipientName}
-  onChange={(e) => setRecipientName(e.target.value)}
-  className="p-4 rounded-2xl bg-white text-black"
-/>
-
-<input
-  type="email"
-  placeholder="E-mail odbiorcy"
-  value={recipientEmail}
-  onChange={(e) => setRecipientEmail(e.target.value)}
-  className="p-4 rounded-2xl bg-white text-black"
-/>
-<label className="flex gap-3 items-start">
-  <input
-    type="checkbox"
-    checked={smsNotification}
-    onChange={(e) => setSmsNotification(e.target.checked)}
-    className="mt-1"
-  />
-
-  <div>
-    <p className="text-sm text-gray-300">
-      Nie pozwól, by odbiorca przeoczył Echo (+1,99 zł)
-    </p>
-
-    <p className="text-xs text-gray-500 mt-1">
-      Odbiorca otrzyma krótkie powiadomienie SMS w momencie dostarczenia wiadomości.
-    </p>
-  </div>
-</label>
-{smsNotification && (
-  <input
-    type="tel"
-    placeholder="Numer telefonu odbiorcy"
-    value={recipientPhone}
-    onChange={(e) => setRecipientPhone(e.target.value)}
-    className="p-4 rounded-2xl bg-white text-black"
-  />
-)}
-
-<input
-  type="text"
-  placeholder="Kod rabatowy (opcjonalnie)"
-  value={discountCode}
-  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-  className="p-4 rounded-2xl bg-white text-black"
-/>
-
-<textarea
-  placeholder="Dodaj dedykację (opcjonalnie)..."
-  value={dedication}
-  onChange={(e) => setDedication(e.target.value)}
-  className="p-4 rounded-2xl bg-white text-black min-h-[120px]"
-/>
-
-          {!isValidEmail(recipientEmail) && recipientEmail.length > 0 && (
-            <p className="text-red-400 text-sm">
-              Podaj poprawny adres e-mail.
+          <input
+            type="email"
+            placeholder="Twój e-mail"
+            value={senderEmail}
+            onChange={(event) => setSenderEmail(event.target.value)}
+            className="rounded-2xl bg-white p-4 text-black"
+          />
+          {senderEmail.length > 0 && !isValidEmail(senderEmail) && (
+            <p className="text-sm text-red-400">
+              Podaj poprawny adres e-mail nadawcy.
             </p>
           )}
-          {smsNotification &&
-  recipientPhone.length > 0 &&
-  !isValidPhone(recipientPhone) && (
-    <p className="text-red-400 text-sm">
-      Podaj poprawny numer telefonu.
-    </p>
-)}
+
+          <input
+            type="text"
+            placeholder="Imię odbiorcy"
+            value={recipientName}
+            onChange={(event) => setRecipientName(event.target.value)}
+            className="rounded-2xl bg-white p-4 text-black"
+          />
+
+          {productType === "echo" ? (
+            <>
+              <input
+                type="email"
+                placeholder="E-mail odbiorcy"
+                value={recipientEmail}
+                onChange={(event) => setRecipientEmail(event.target.value)}
+                className="rounded-2xl bg-white p-4 text-black"
+              />
+              {recipientEmail.length > 0 && !isValidEmail(recipientEmail) && (
+                <p className="text-sm text-red-400">
+                  Podaj poprawny adres e-mail odbiorcy.
+                </p>
+              )}
+
+              <label className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={smsNotification}
+                  onChange={(event) => setSmsNotification(event.target.checked)}
+                  className="mt-1"
+                />
+                <div>
+                  <p className="text-sm text-gray-300">
+                    Powiadom odbiorcę SMS-em (+1,99 zł)
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    SMS zostanie wysłany w momencie dostarczenia wiadomości.
+                  </p>
+                </div>
+              </label>
+
+              {smsNotification && (
+                <>
+                  <input
+                    type="tel"
+                    placeholder="Numer telefonu odbiorcy"
+                    value={recipientPhone}
+                    onChange={(event) => setRecipientPhone(event.target.value)}
+                    className="rounded-2xl bg-white p-4 text-black"
+                  />
+                  {recipientPhone.length > 0 &&
+                    !isValidPhone(recipientPhone) && (
+                      <p className="text-sm text-red-400">
+                        Podaj poprawny numer telefonu.
+                      </p>
+                    )}
+                </>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <p className="text-sm text-gray-300">Termin dostarczenia</p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(event) => setDeliveryDate(event.target.value)}
+                    className="rounded-2xl bg-white p-4 text-black"
+                  />
+                  <input
+                    type="time"
+                    value={deliveryTime}
+                    onChange={(event) => setDeliveryTime(event.target.value)}
+                    className="rounded-2xl bg-white p-4 text-black"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-4 rounded-2xl border border-white/10 p-4">
+              <p className="text-sm font-medium text-gray-200">Adres wysyłki</p>
+              <input
+                type="text"
+                placeholder="Imię i nazwisko odbiorcy przesyłki"
+                value={shippingName}
+                onChange={(event) => setShippingName(event.target.value)}
+                className="rounded-2xl bg-white p-4 text-black"
+              />
+              <input
+                type="tel"
+                placeholder="Numer telefonu do przesyłki"
+                value={shippingPhone}
+                onChange={(event) => setShippingPhone(event.target.value)}
+                className="rounded-2xl bg-white p-4 text-black"
+              />
+              {shippingPhone.length > 0 && !isValidPhone(shippingPhone) && (
+                <p className="text-sm text-red-400">
+                  Podaj poprawny numer telefonu.
+                </p>
+              )}
+              <input
+                type="text"
+                placeholder="Ulica i numer domu / mieszkania"
+                value={shippingAddress}
+                onChange={(event) => setShippingAddress(event.target.value)}
+                className="rounded-2xl bg-white p-4 text-black"
+              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <input
+                  type="text"
+                  placeholder="Kod pocztowy"
+                  value={shippingPostcode}
+                  onChange={(event) => setShippingPostcode(event.target.value)}
+                  className="rounded-2xl bg-white p-4 text-black"
+                />
+                <input
+                  type="text"
+                  placeholder="Miejscowość"
+                  value={shippingCity}
+                  onChange={(event) => setShippingCity(event.target.value)}
+                  className="rounded-2xl bg-white p-4 text-black"
+                />
+              </div>
+            </div>
+          )}
+
+          <input
+            type="text"
+            placeholder="Kod rabatowy (opcjonalnie)"
+            value={discountCode}
+            onChange={(event) =>
+              setDiscountCode(event.target.value.toUpperCase())
+            }
+            className="rounded-2xl bg-white p-4 text-black"
+          />
+
+          <textarea
+            placeholder="Dodaj dedykację (opcjonalnie)..."
+            value={dedication}
+            onChange={(event) => setDedication(event.target.value)}
+            className="min-h-[120px] rounded-2xl bg-white p-4 text-black"
+          />
+
+          <Agreements />
 
           <button
-            onClick={() => setStep("delivery")}
-            disabled={!canContinueToDelivery}
-            className="px-6 py-3 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
+            type="button"
+            onClick={saveMessage}
+            disabled={!canProceedToPayment}
+            className="rounded-2xl bg-white px-6 py-3 font-medium tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            Dalej
+            {isSaving ? "Przekierowanie..." : "Przejdź do płatności"}
           </button>
 
           <button
-            onClick={() => setStep("record")}
-            className="text-gray-400 text-sm"
+            type="button"
+            onClick={() => setStep("product")}
+            className="text-sm text-gray-400"
           >
-            Wróć
+            Zmień produkt
           </button>
         </div>
       </main>
@@ -426,54 +587,50 @@ if (typeof window !== "undefined" && (window as any).ttq) {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-4 bg-black text-white antialiased px-6">
-      <img
-        src="/logo2.png"
-        alt="Echoria"
-        className="w-72 h-auto md:w-96"
-      />
-
-      <p className="text-gray-400 text-center max-w-xl text-lg leading-relaxed font-light">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-black px-6 text-white antialiased">
+      <img src="/logo2.png" alt="Echoria" className="h-auto w-72 md:w-96" />
+      <p className="max-w-xl text-center text-lg font-light leading-relaxed text-gray-400">
         Nagraj wiadomość, która wybrzmi we właściwym momencie.
       </p>
 
       {!isRecording ? (
         <button
+          type="button"
           onClick={startRecording}
           disabled={isUploading}
-          className="px-8 py-2 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition disabled:opacity-50"
+          className="rounded-2xl bg-white px-8 py-2 font-medium tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
         >
           Rozpocznij nagrywanie
         </button>
       ) : (
         <button
+          type="button"
           onClick={stopRecording}
-          className="px-8 py-2 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
+          className="rounded-2xl bg-white px-8 py-2 font-medium tracking-wide text-black transition hover:opacity-90"
         >
           Zatrzymaj nagrywanie
         </button>
       )}
 
       {isUploading && (
-        <p className="text-gray-400 text-sm">
-          Trwa przesyłanie nagrania...
-        </p>
+        <p className="text-sm text-gray-400">Trwa przesyłanie nagrania...</p>
       )}
 
       {audioUrl && !isUploading && (
         <div className="flex flex-col items-center gap-4">
           <audio controls src={audioUrl} />
-
           <button
-            onClick={() => setStep("details")}
-            className="px-8 py-3 bg-white text-black rounded-2xl font-medium tracking-wide hover:opacity-90 transition"
+            type="button"
+            onClick={() => setStep("product")}
+            disabled={!uploadedAudioUrl}
+            className="rounded-2xl bg-white px-8 py-3 font-medium tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            Dalej
+            Wybierz produkt
           </button>
-
           <button
+            type="button"
             onClick={deleteRecording}
-            className="px-4 py-2 border border-white/30 rounded-2xl text-sm hover:bg-white/5 transition"
+            className="rounded-2xl border border-white/30 px-4 py-2 text-sm transition hover:bg-white/5"
           >
             Usuń nagranie
           </button>
