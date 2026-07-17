@@ -27,10 +27,13 @@ export default function PaymentSuccessPage() {
       return;
     }
 
+    // Od tego miejsca TypeScript wie, że to string
+    const validSessionId: string = sessionId;
+
     async function loadSession() {
       try {
         const response = await fetch(
-          `/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`,
+          `/api/stripe/session?session_id=${encodeURIComponent(validSessionId)}`,
           {
             cache: "no-store",
           }
@@ -93,10 +96,8 @@ export default function PaymentSuccessPage() {
         <div className="flex flex-col gap-5">
           <h1 className="text-4xl md:text-6xl font-serif font-light leading-tight tracking-wide">
             {productType === "echo" && "Twoje Echo wyruszyło w drogę!"}
-
             {isPhysicalProduct && "Każde Echo ma swoją historię."}
-
-            {!productType && "Każde Echo ma swoją historię."}
+            {!productType && "Dziękujemy za Twoje zamówienie."}
           </h1>
 
           <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-light">
@@ -119,9 +120,9 @@ export default function PaymentSuccessPage() {
 
             {!productType && (
               <>
-                Twoje właśnie powstaje.
+                Płatność została przyjęta.
                 <br />
-                Już wkrótce będzie gotowe, by wyruszyć w drogę.
+                Rozpoczynamy realizację Twojego zamówienia.
               </>
             )}
           </p>
