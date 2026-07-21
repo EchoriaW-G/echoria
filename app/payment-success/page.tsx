@@ -109,10 +109,10 @@ export default function PaymentSuccessPage() {
               "Twoje Echo wyruszyło w drogę!"}
 
             {productType === "gift" &&
-              "Twój Echo Gift właśnie powstaje."}
+              "Każde Echo ma swoją historię."}
 
             {productType === "frame" &&
-              "Twoja Echo Frame właśnie powstaje."}
+              "Każde Echo ma swoją historię."}
 
             {!productType &&
               "Dziękujemy za Twoje zamówienie."}
@@ -130,19 +130,17 @@ export default function PaymentSuccessPage() {
 
             {productType === "gift" && (
               <>
-                Przygotowujemy zawieszkę z kodem QR połączoną z Twoją
-                wiadomością.
+                Twoje właśnie powstaje.
                 <br />
-                Już wkrótce będzie gotowa, aby wyruszyć w drogę.
+                Zawieszka wkrótce będzie gotowa, by wyruszyć w drogę.
               </>
             )}
 
             {productType === "frame" && (
               <>
-                Przygotowujemy personalizowaną ramkę z kodem QR połączoną z
-                Twoją wiadomością.
+                Twoje właśnie powstaje.
                 <br />
-                Już wkrótce będzie gotowa, aby wyruszyć w drogę.
+                Ramka wkrótce będzie gotowa, by wyruszyć w drogę.
               </>
             )}
 
