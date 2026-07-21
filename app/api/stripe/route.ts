@@ -57,10 +57,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (message.status === "paid") {
-      return NextResponse.json({
-        url: "https://app.echoria.pl/payment-success",
-      });
-    }
+  const productType = message.product_type as ProductType;
+
+  return NextResponse.json({
+    url: `https://app.echoria.pl/payment-success?product_type=${productType}`,
+  });
+}
 
     const productType = message.product_type as ProductType;
     const product = PRODUCTS[productType];
@@ -92,19 +94,24 @@ export async function POST(req: NextRequest) {
     }
 
     if (amount === 0) {
-      const { error: updateError } = await supabase
-        .from("messages")
-        .update({ status: "paid" })
-        .eq("id", messageId);
+  const { error: updateError } = await supabase
+    .from("messages")
+    .update({ status: "paid" })
+    .eq("id", messageId);
 
-      if (updateError) {
-        console.error("Supabase update error:", updateError);
+  if (updateError) {
+    console.error("Supabase update error:", updateError);
 
-        return NextResponse.json(
-          { error: "Nie udało się zatwierdzić zamówienia." },
-          { status: 500 }
-        );
-      }
+    return NextResponse.json(
+      { error: "Nie udało się zatwierdzić zamówienia." },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    url: `https://app.echoria.pl/payment-success?product_type=${productType}`,
+  });
+
 
       return NextResponse.json({
         url: "https://app.echoria.pl/payment-success",

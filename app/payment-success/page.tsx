@@ -14,26 +14,48 @@ function isProductType(value: unknown): value is ProductType {
   return value === "echo" || value === "gift" || value === "frame";
 }
 
+function trackPurchase(productType: ProductType) {
+  (window as any).ttq?.track("Purchase", {
+    value: prices[productType],
+    currency: "PLN",
+    content_name: productType,
+    content_id: productType,
+    content_type: "product",
+  });
+}
+
 export default function PaymentSuccessPage() {
   const [productType, setProductType] = useState<ProductType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const sessionId = searchParams.get("session_id");
 
+    const sessionId = searchParams.get("session_id");
+    const productTypeFromUrl = searchParams.get("product_type");
+
+    // Zamówienie darmowe albo wcześniej opłacone
+    if (isProductType(productTypeFromUrl)) {
+      setProductType(productTypeFromUrl);
+      trackPurchase(productTypeFromUrl);
+      setIsLoading(false);
+      return;
+    }
+
+    // Brak session_id i brak product_type
     if (!sessionId) {
       setIsLoading(false);
       return;
     }
 
-    // Od tego miejsca TypeScript wie, że to string
     const validSessionId: string = sessionId;
 
     async function loadSession() {
       try {
         const response = await fetch(
-          `/api/stripe/session?session_id=${encodeURIComponent(validSessionId)}`,
+          `/api/stripe/session?session_id=${encodeURIComponent(
+            validSessionId
+          )}`,
           {
             cache: "no-store",
           }
@@ -52,17 +74,8 @@ export default function PaymentSuccessPage() {
           throw new Error("Nieznany lub brakujący typ produktu.");
         }
 
-        const receivedProductType = data.productType;
-
-        setProductType(receivedProductType);
-
-        (window as any).ttq?.track("Purchase", {
-          value: prices[receivedProductType],
-          currency: "PLN",
-          content_name: receivedProductType,
-          content_id: receivedProductType,
-          content_type: "product",
-        });
+        setProductType(data.productType);
+        trackPurchase(data.productType);
       } catch (error) {
         console.error("Błąd strony sukcesu:", error);
       } finally {
@@ -81,9 +94,6 @@ export default function PaymentSuccessPage() {
     );
   }
 
-  const isPhysicalProduct =
-    productType === "gift" || productType === "frame";
-
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6 antialiased">
       <div className="max-w-2xl w-full flex flex-col items-center text-center gap-8">
@@ -95,9 +105,17 @@ export default function PaymentSuccessPage() {
 
         <div className="flex flex-col gap-5">
           <h1 className="text-4xl md:text-6xl font-serif font-light leading-tight tracking-wide">
-            {productType === "echo" && "Twoje Echo wyruszyło w drogę!"}
-            {isPhysicalProduct && "Każde Echo ma swoją historię."}
-            {!productType && "Dziękujemy za Twoje zamówienie."}
+            {productType === "echo" &&
+              "Twoje Echo wyruszyło w drogę!"}
+
+            {productType === "gift" &&
+              "Twój Echo Gift właśnie powstaje."}
+
+            {productType === "frame" &&
+              "Twoja Echo Frame właśnie powstaje."}
+
+            {!productType &&
+              "Dziękujemy za Twoje zamówienie."}
           </h1>
 
           <p className="text-gray-400 text-lg md:text-xl leading-relaxed font-light">
@@ -110,11 +128,21 @@ export default function PaymentSuccessPage() {
               </>
             )}
 
-            {isPhysicalProduct && (
+            {productType === "gift" && (
               <>
-                Twoje właśnie powstaje.
+                Przygotowujemy zawieszkę z kodem QR połączoną z Twoją
+                wiadomością.
                 <br />
-                Już wkrótce będzie gotowe, by wyruszyć w drogę.
+                Już wkrótce będzie gotowa, aby wyruszyć w drogę.
+              </>
+            )}
+
+            {productType === "frame" && (
+              <>
+                Przygotowujemy personalizowaną ramkę z kodem QR połączoną z
+                Twoją wiadomością.
+                <br />
+                Już wkrótce będzie gotowa, aby wyruszyć w drogę.
               </>
             )}
 
