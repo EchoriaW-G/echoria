@@ -593,24 +593,24 @@ export default function Home() {
         Nagraj wiadomość, która wybrzmi we właściwym momencie.
       </p>
 
-      {!isRecording ? (
-        <button
-          type="button"
-          onClick={startRecording}
-          disabled={isUploading}
-          className="rounded-2xl bg-white px-8 py-2 font-medium tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
-        >
-          Rozpocznij nagrywanie
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={stopRecording}
-          className="rounded-2xl bg-white px-8 py-2 font-medium tracking-wide text-black transition hover:opacity-90"
-        >
-          Zatrzymaj nagrywanie
-        </button>
-      )}
+      {!isRecording && !audioUrl ? (
+  <button
+    type="button"
+    onClick={startRecording}
+    disabled={isUploading}
+    className="rounded-2xl bg-white px-8 py-2 font-medium tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
+  >
+    Rozpocznij nagrywanie
+  </button>
+) : isRecording ? (
+  <button
+    type="button"
+    onClick={stopRecording}
+    className="rounded-2xl bg-white px-8 py-2 font-medium tracking-wide text-black transition hover:opacity-90"
+  >
+    Zatrzymaj nagrywanie
+  </button>
+) : null}
 
       {isUploading && (
         <p className="text-sm text-gray-400">Trwa przesyłanie nagrania...</p>
