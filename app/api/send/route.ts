@@ -127,7 +127,7 @@ export async function POST() {
               }
 
               <a
-                href="https://app.echoria.pl/message/${message.id}"
+                href="https://app.echoria.pl/m/${message.public_token}"
                 style="
                   display:block;
                   width:100%;

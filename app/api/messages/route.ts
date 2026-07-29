@@ -158,8 +158,8 @@ export async function POST(req: NextRequest) {
           : null,
         shipping_city: isPhysicalProduct ? shippingCity!.trim() : null,
       })
-      .select("id")
-      .single();
+      .select("id, public_token")
+.single();
 
     if (error) {
       console.error("Supabase insert error:", error);
@@ -171,11 +171,12 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      {
-        messageId: data.id,
-      },
-      { status: 201 }
-    );
+  {
+    messageId: data.id,
+    publicToken: data.public_token,
+  },
+  { status: 201 }
+);
   } catch (error) {
     console.error("Create message error:", error);
 
