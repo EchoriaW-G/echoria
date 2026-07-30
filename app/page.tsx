@@ -416,32 +416,7 @@ shippingPrice: isPhysicalProduct
               </button>
             );
           })}
-<div className="rounded-2xl border border-white/10 p-5 space-y-2">
 
-  <div className="flex justify-between">
-    <span>Produkt</span>
-    <span>{productPrices[productType].toFixed(2)} zł</span>
-  </div>
-
-  {isPhysicalProduct && (
-    <div className="flex justify-between text-gray-400">
-      <span>
-        {shippingMethod === "locker"
-          ? "Paczkomat InPost"
-          : "Kurier"}
-      </span>
-
-      <span>{shippingPrice.toFixed(2)} zł</span>
-    </div>
-  )}
-
-  <div className="border-t border-white/10 pt-3 flex justify-between text-lg font-semibold">
-    <span>Razem</span>
-
-    <span>{totalPrice.toFixed(2)} zł</span>
-  </div>
-
-</div>
           <button
             type="button"
             onClick={() => setStep("record")}
@@ -527,7 +502,7 @@ shippingPrice: isPhysicalProduct
                     Powiadom odbiorcę SMS-em (+1,99 zł)
                   </p>
                   <p className="mt-1 text-xs text-gray-500">
-                    SMS zostanie wysłany w momencie dostarczenia wiadomości.
+                    SMS zostanie wysłany w momencie dostarczenia Echo.
                   </p>
                 </div>
               </label>
@@ -570,7 +545,7 @@ shippingPrice: isPhysicalProduct
             </>
           ) : (
             <div className="flex flex-col gap-4 rounded-2xl border border-white/10 p-4">
-              <p className="text-sm font-medium text-gray-200">Adres wysyłki</p>
+              <p className="text-sm font-medium text-gray-200">Metoda dostawy</p>
               <div className="flex flex-col gap-3 mb-2">
 
   <button
