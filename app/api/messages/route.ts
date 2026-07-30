@@ -31,6 +31,9 @@ type CreateMessageBody = {
   shippingAddress?: string | null;
   shippingPostcode?: string | null;
   shippingCity?: string | null;
+
+shippingMethod?: "locker" | "courier" | null;
+shippingPrice?: number;
 };
 
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
@@ -59,7 +62,9 @@ export async function POST(req: NextRequest) {
       shippingAddress,
       shippingPostcode,
       shippingCity,
-    } = body;
+  shippingMethod,
+  shippingPrice,
+} = body;
 
     if (!["echo", "gift", "frame"].includes(productType)) {
       return NextResponse.json(
@@ -108,20 +113,37 @@ export async function POST(req: NextRequest) {
     }
 
     if (isPhysicalProduct) {
-      if (
-        !shippingName?.trim() ||
-        !shippingPhone?.trim() ||
-        !isValidPhone(shippingPhone) ||
-        !shippingAddress?.trim() ||
-        !shippingPostcode?.trim() ||
-        !shippingCity?.trim()
-      ) {
-        return NextResponse.json(
-          { error: "Uzupełnij poprawnie wszystkie dane wysyłkowe." },
-          { status: 400 }
-        );
-      }
+  if (
+    !shippingName?.trim() ||
+    !shippingPhone?.trim() ||
+    !isValidPhone(shippingPhone)
+  ) {
+    return NextResponse.json(
+      { error: "Uzupełnij dane odbiorcy." },
+      { status: 400 }
+    );
+  }
+
+  if (shippingMethod === "locker") {
+    if (!shippingAddress?.trim()) {
+      return NextResponse.json(
+        { error: "Wybierz paczkomat." },
+        { status: 400 }
+      );
     }
+  } else {
+    if (
+      !shippingAddress?.trim() ||
+      !shippingPostcode?.trim() ||
+      !shippingCity?.trim()
+    ) {
+      return NextResponse.json(
+        { error: "Uzupełnij adres dostawy." },
+        { status: 400 }
+      );
+    }
+  }
+}
 
     const { data, error } = await supabaseAdmin
       .from("messages")
@@ -157,6 +179,13 @@ export async function POST(req: NextRequest) {
           ? shippingPostcode!.trim()
           : null,
         shipping_city: isPhysicalProduct ? shippingCity!.trim() : null,
+        shipping_method: isPhysicalProduct
+  ? shippingMethod
+  : null,
+
+shipping_price: isPhysicalProduct
+  ? shippingPrice
+  : 0,
       })
       .select("id, public_token")
 .single();

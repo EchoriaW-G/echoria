@@ -45,7 +45,14 @@ export async function POST(req: NextRequest) {
 
     const { data: message, error } = await supabase
       .from("messages")
-      .select("product_type, sms_notification, discount_code, status")
+      .select(`
+  product_type,
+  sms_notification,
+  discount_code,
+  status,
+  shipping_method,
+  shipping_price
+`)
       .eq("id", messageId)
       .single();
 
@@ -74,26 +81,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let amount = product.amount;
-    let productName = product.name;
-
     const hasSms =
-      productType === "echo" && message.sms_notification === true;
+  productType === "echo" && message.sms_notification === true;
 
-    if (hasSms) {
-      amount += 199;
-      productName += " + powiadomienie SMS";
-    }
+const shippingPrice = Number(message.shipping_price ?? 0);
 
-    const discountCode = message.discount_code
-      ?.trim()
-      .toUpperCase();
+const shippingMethod =
+  message.shipping_method as "locker" | "courier" | null;
+let productAmount = product.amount;
+let productName = product.name;
 
-    if (discountCode === "PREMIERA") {
-      amount = 0;
-    }
+if (hasSms) {
+  productAmount += 199;
+  productName += " + powiadomienie SMS";
+}
 
-    if (amount === 0) {
+const discountCode =
+  message.discount_code?.trim().toUpperCase();
+
+if (discountCode === "PREMIERA") {
+  productAmount = 0;
+}
+
+if (productAmount === 0) {
   const { error: updateError } = await supabase
     .from("messages")
     .update({ status: "paid" })
@@ -111,40 +121,55 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     url: `https://app.echoria.pl/payment-success?product_type=${productType}`,
   });
+}
 
-
-      return NextResponse.json({
-        url: "https://app.echoria.pl/payment-success",
-      });
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-
-      line_items: [
-        {
-          price_data: {
-            currency: "pln",
-            product_data: {
-              name: productName,
-            },
-            unit_amount: amount,
-          },
-          quantity: 1,
-        },
-      ],
-
-      metadata: {
-        messageId: String(messageId),
-        productType,
+const lineItems = [
+  {
+    price_data: {
+      currency: "pln" as const,
+      product_data: {
+        name: productName,
       },
+      unit_amount: productAmount,
+    },
+    quantity: 1,
+  },
+];
 
-      success_url:
-        "https://app.echoria.pl/payment-success?session_id={CHECKOUT_SESSION_ID}",
+if (shippingPrice > 0) {
+  lineItems.push({
+    price_data: {
+      currency: "pln",
+      product_data: {
+        name:
+          shippingMethod === "locker"
+            ? "Dostawa – Paczkomat InPost"
+            : "Dostawa – Kurier",
+      },
+      unit_amount: shippingPrice,
+    },
+    quantity: 1,
+  });
+}
+    const session = await stripe.checkout.sessions.create({
+  mode: "payment",
 
-      cancel_url: "https://app.echoria.pl",
-    });
+  payment_method_types: ["card"],
+
+  line_items: lineItems,
+
+ metadata: {
+  messageId: String(messageId),
+  productType,
+  shippingMethod: shippingMethod ?? "",
+  shippingPrice: String(shippingPrice),
+},
+
+  success_url:
+    "https://app.echoria.pl/payment-success?session_id={CHECKOUT_SESSION_ID}",
+
+  cancel_url: "https://app.echoria.pl",
+});
 
     if (!session.url) {
       return NextResponse.json(

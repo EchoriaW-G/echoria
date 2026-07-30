@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase";
 
 type Step = "record" | "product" | "details";
 type ProductType = "echo" | "gift" | "frame";
+type ShippingMethod = "locker" | "courier";
 
 const productCopy: Record<
   ProductType,
@@ -27,7 +28,16 @@ const productCopy: Record<
     description: "Personalizowana ramka z kodem QR, gotowa do wręczenia.",
   },
 };
+const shippingPrices = {
+  locker: 14.99,
+  courier: 16.99,
+};
 
+const productPrices = {
+  echo: 19,
+  gift: 49,
+  frame: 89,
+};
 export default function Home() {
   const [step, setStep] = useState<Step>("record");
   const [isRecording, setIsRecording] = useState(false);
@@ -55,6 +65,10 @@ export default function Home() {
   const [shippingAddress, setShippingAddress] = useState("");
   const [shippingPostcode, setShippingPostcode] = useState("");
   const [shippingCity, setShippingCity] = useState("");
+  const [shippingMethod, setShippingMethod] =
+  useState<ShippingMethod>("locker");
+
+const [shippingLocker, setShippingLocker] = useState("");
 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDigitalService, setAcceptDigitalService] = useState(false);
@@ -65,6 +79,12 @@ export default function Home() {
   const mimeTypeRef = useRef("audio/webm");
 
   const isPhysicalProduct = productType !== "echo";
+  const shippingPrice = isPhysicalProduct
+  ? shippingPrices[shippingMethod]
+  : 0;
+
+const totalPrice =
+  productPrices[productType] + shippingPrice;
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
   const isValidPhone = (phone: string) =>
     /^\+?[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
@@ -82,12 +102,20 @@ export default function Home() {
       (!smsNotification || isValidPhone(recipientPhone)));
 
   const hasValidShippingDetails =
-    !isPhysicalProduct ||
-    (shippingName.trim() !== "" &&
-      isValidPhone(shippingPhone) &&
-      shippingAddress.trim() !== "" &&
-      shippingPostcode.trim() !== "" &&
-      shippingCity.trim() !== "");
+  !isPhysicalProduct ||
+  (
+    shippingName.trim() !== "" &&
+    isValidPhone(shippingPhone) &&
+    (
+      shippingMethod === "locker"
+        ? shippingLocker.trim() !== ""
+        : (
+            shippingAddress.trim() !== "" &&
+            shippingPostcode.trim() !== "" &&
+            shippingCity.trim() !== ""
+          )
+    )
+  );
 
   const canProceedToPayment =
     hasValidCommonDetails &&
@@ -224,6 +252,15 @@ export default function Home() {
           shippingAddress: isPhysicalProduct ? shippingAddress : null,
           shippingPostcode: isPhysicalProduct ? shippingPostcode : null,
           shippingCity: isPhysicalProduct ? shippingCity : null,
+          shippingMethod: isPhysicalProduct
+  ? shippingMethod
+  : null,
+
+shippingPrice: isPhysicalProduct
+  ? shippingMethod === "locker"
+    ? 1499
+    : 1699
+  : 0,
         }),
       });
 
@@ -242,10 +279,18 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messageId: messageData.messageId,
-          productType,
-          smsNotification: productType === "echo" && smsNotification,
-        }),
+  messageId: messageData.messageId,
+  productType,
+  smsNotification: productType === "echo" && smsNotification,
+
+  shippingMethod: isPhysicalProduct
+    ? shippingMethod
+    : null,
+
+  shippingPrice: isPhysicalProduct
+    ? shippingPrice
+    : 0,
+}),
       });
 
       const stripeData = await response.json();
@@ -371,7 +416,32 @@ export default function Home() {
               </button>
             );
           })}
+<div className="rounded-2xl border border-white/10 p-5 space-y-2">
 
+  <div className="flex justify-between">
+    <span>Produkt</span>
+    <span>{productPrices[productType].toFixed(2)} zł</span>
+  </div>
+
+  {isPhysicalProduct && (
+    <div className="flex justify-between text-gray-400">
+      <span>
+        {shippingMethod === "locker"
+          ? "Paczkomat InPost"
+          : "Kurier"}
+      </span>
+
+      <span>{shippingPrice.toFixed(2)} zł</span>
+    </div>
+  )}
+
+  <div className="border-t border-white/10 pt-3 flex justify-between text-lg font-semibold">
+    <span>Razem</span>
+
+    <span>{totalPrice.toFixed(2)} zł</span>
+  </div>
+
+</div>
           <button
             type="button"
             onClick={() => setStep("record")}
@@ -501,6 +571,45 @@ export default function Home() {
           ) : (
             <div className="flex flex-col gap-4 rounded-2xl border border-white/10 p-4">
               <p className="text-sm font-medium text-gray-200">Adres wysyłki</p>
+              <div className="flex flex-col gap-3 mb-2">
+
+  <button
+    type="button"
+    onClick={() => setShippingMethod("locker")}
+    className={`rounded-2xl border p-4 text-left transition ${
+      shippingMethod === "locker"
+        ? "border-white bg-white text-black"
+        : "border-white/20"
+    }`}
+  >
+    <div className="font-medium">
+      Paczkomat InPost
+    </div>
+
+    <div className="text-sm opacity-70">
+      14,99 zł
+    </div>
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setShippingMethod("courier")}
+    className={`rounded-2xl border p-4 text-left transition ${
+      shippingMethod === "courier"
+        ? "border-white bg-white text-black"
+        : "border-white/20"
+    }`}
+  >
+    <div className="font-medium">
+      Kurier
+    </div>
+
+    <div className="text-sm opacity-70">
+      16,99 zł
+    </div>
+  </button>
+
+</div>
               <input
                 type="text"
                 placeholder="Imię i nazwisko odbiorcy przesyłki"
@@ -520,29 +629,43 @@ export default function Home() {
                   Podaj poprawny numer telefonu.
                 </p>
               )}
-              <input
-                type="text"
-                placeholder="Ulica i numer domu / mieszkania"
-                value={shippingAddress}
-                onChange={(event) => setShippingAddress(event.target.value)}
-                className="rounded-2xl bg-white p-4 text-black"
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <input
-                  type="text"
-                  placeholder="Kod pocztowy"
-                  value={shippingPostcode}
-                  onChange={(event) => setShippingPostcode(event.target.value)}
-                  className="rounded-2xl bg-white p-4 text-black"
-                />
-                <input
-                  type="text"
-                  placeholder="Miejscowość"
-                  value={shippingCity}
-                  onChange={(event) => setShippingCity(event.target.value)}
-                  className="rounded-2xl bg-white p-4 text-black"
-                />
-              </div>
+              {shippingMethod === "locker" ? (
+  <input
+    type="text"
+    placeholder="Kod paczkomatu (na razie ręcznie)"
+    value={shippingLocker}
+    onChange={(event) => setShippingLocker(event.target.value)}
+    className="rounded-2xl bg-white p-4 text-black"
+  />
+) : (
+  <>
+    <input
+      type="text"
+      placeholder="Ulica i numer domu / mieszkania"
+      value={shippingAddress}
+      onChange={(event) => setShippingAddress(event.target.value)}
+      className="rounded-2xl bg-white p-4 text-black"
+    />
+
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <input
+        type="text"
+        placeholder="Kod pocztowy"
+        value={shippingPostcode}
+        onChange={(event) => setShippingPostcode(event.target.value)}
+        className="rounded-2xl bg-white p-4 text-black"
+      />
+
+      <input
+        type="text"
+        placeholder="Miejscowość"
+        value={shippingCity}
+        onChange={(event) => setShippingCity(event.target.value)}
+        className="rounded-2xl bg-white p-4 text-black"
+      />
+    </div>
+  </>
+)}
             </div>
           )}
 
@@ -571,7 +694,9 @@ export default function Home() {
             disabled={!canProceedToPayment}
             className="rounded-2xl bg-white px-6 py-3 font-medium tracking-wide text-black transition hover:opacity-90 disabled:opacity-50"
           >
-            {isSaving ? "Przekierowanie..." : "Przejdź do płatności"}
+            {isSaving
+  ? "Przekierowanie..."
+  : `Zapłać ${totalPrice.toFixed(2)} zł`}
           </button>
 
           <button
