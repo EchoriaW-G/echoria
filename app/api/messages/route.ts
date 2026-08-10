@@ -13,6 +13,7 @@ const supabaseAdmin = createClient(
 );
 
 type ProductType = "echo" | "gift" | "frame";
+type ShippingMethod = "locker" | "courier";
 
 type CreateMessageBody = {
   senderName: string;
@@ -26,17 +27,18 @@ type CreateMessageBody = {
   deliveryDate?: string | null;
   audioUrl: string;
   productType: ProductType;
+
   shippingName?: string | null;
   shippingPhone?: string | null;
   shippingAddress?: string | null;
   shippingPostcode?: string | null;
   shippingCity?: string | null;
-
-shippingMethod?: "locker" | "courier" | null;
-shippingPrice?: number;
+  shippingMethod?: ShippingMethod | null;
+  shippingPrice?: number;
 };
 
-const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+const isValidEmail = (email: string) =>
+  /\S+@\S+\.\S+/.test(email);
 
 const isValidPhone = (phone: string) =>
   /^\+?[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
@@ -62,9 +64,9 @@ export async function POST(req: NextRequest) {
       shippingAddress,
       shippingPostcode,
       shippingCity,
-  shippingMethod,
-  shippingPrice,
-} = body;
+      shippingMethod,
+      shippingPrice,
+    } = body;
 
     if (!["echo", "gift", "frame"].includes(productType)) {
       return NextResponse.json(
@@ -96,14 +98,18 @@ export async function POST(req: NextRequest) {
         !deliveryDate
       ) {
         return NextResponse.json(
-          { error: "Uzupełnij e-mail odbiorcy i termin dostarczenia." },
+          {
+            error:
+              "Uzupełnij e-mail odbiorcy i termin dostarczenia.",
+          },
           { status: 400 }
         );
       }
 
       if (
         smsNotification &&
-        (!recipientPhone?.trim() || !isValidPhone(recipientPhone))
+        (!recipientPhone?.trim() ||
+          !isValidPhone(recipientPhone))
       ) {
         return NextResponse.json(
           { error: "Podaj poprawny numer telefonu odbiorcy." },
@@ -113,37 +119,49 @@ export async function POST(req: NextRequest) {
     }
 
     if (isPhysicalProduct) {
-  if (
-    !shippingName?.trim() ||
-    !shippingPhone?.trim() ||
-    !isValidPhone(shippingPhone)
-  ) {
-    return NextResponse.json(
-      { error: "Uzupełnij dane odbiorcy." },
-      { status: 400 }
-    );
-  }
+      if (
+        !shippingName?.trim() ||
+        !shippingPhone?.trim() ||
+        !isValidPhone(shippingPhone)
+      ) {
+        return NextResponse.json(
+          { error: "Uzupełnij dane odbiorcy." },
+          { status: 400 }
+        );
+      }
 
-  if (shippingMethod === "locker") {
-    if (!shippingAddress?.trim()) {
-      return NextResponse.json(
-        { error: "Wybierz paczkomat." },
-        { status: 400 }
-      );
+      if (
+        shippingMethod !== "locker" &&
+        shippingMethod !== "courier"
+      ) {
+        return NextResponse.json(
+          { error: "Wybierz metodę dostawy." },
+          { status: 400 }
+        );
+      }
+
+      if (shippingMethod === "locker") {
+        if (!shippingAddress?.trim()) {
+          return NextResponse.json(
+            { error: "Wybierz paczkomat." },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (shippingMethod === "courier") {
+        if (
+          !shippingAddress?.trim() ||
+          !shippingPostcode?.trim() ||
+          !shippingCity?.trim()
+        ) {
+          return NextResponse.json(
+            { error: "Uzupełnij adres dostawy." },
+            { status: 400 }
+          );
+        }
+      }
     }
-  } else {
-    if (
-      !shippingAddress?.trim() ||
-      !shippingPostcode?.trim() ||
-      !shippingCity?.trim()
-    ) {
-      return NextResponse.json(
-        { error: "Uzupełnij adres dostawy." },
-        { status: 400 }
-      );
-    }
-  }
-}
 
     const { data, error } = await supabaseAdmin
       .from("messages")
@@ -157,11 +175,15 @@ export async function POST(req: NextRequest) {
           : null,
 
         recipient_phone:
-          isEcho && smsNotification ? recipientPhone!.trim() : null,
+          isEcho && smsNotification
+            ? recipientPhone!.trim()
+            : null,
 
         sms_notification: isEcho && smsNotification,
 
-        discount_code: discountCode?.trim().toUpperCase() || null,
+        discount_code:
+          discountCode?.trim().toUpperCase() || null,
+
         dedication: dedication?.trim() || null,
 
         delivery_date: isEcho ? deliveryDate : null,
@@ -170,47 +192,71 @@ export async function POST(req: NextRequest) {
         status: "pending",
         product_type: productType,
 
-        shipping_name: isPhysicalProduct ? shippingName!.trim() : null,
-        shipping_phone: isPhysicalProduct ? shippingPhone!.trim() : null,
-        shipping_address: isPhysicalProduct
-          ? shippingAddress!.trim()
+        shipping_name: isPhysicalProduct
+          ? shippingName?.trim() || null
           : null,
-        shipping_postcode: isPhysicalProduct
-          ? shippingPostcode!.trim()
-          : null,
-        shipping_city: isPhysicalProduct ? shippingCity!.trim() : null,
-        shipping_method: isPhysicalProduct
-  ? shippingMethod
-  : null,
 
-shipping_price: isPhysicalProduct
-  ? shippingPrice
-  : 0,
+        shipping_phone: isPhysicalProduct
+          ? shippingPhone?.trim() || null
+          : null,
+
+        shipping_address: isPhysicalProduct
+          ? shippingAddress?.trim() || null
+          : null,
+
+        shipping_postcode:
+          isPhysicalProduct &&
+          shippingMethod === "courier"
+            ? shippingPostcode?.trim() || null
+            : null,
+
+        shipping_city:
+          isPhysicalProduct &&
+          shippingMethod === "courier"
+            ? shippingCity?.trim() || null
+            : null,
+
+        shipping_method: isPhysicalProduct
+          ? shippingMethod
+          : null,
+
+        shipping_price: isPhysicalProduct
+          ? shippingPrice ?? 0
+          : 0,
       })
       .select("id, public_token")
-.single();
+      .single();
 
     if (error) {
       console.error("Supabase insert error:", error);
 
       return NextResponse.json(
-        { error: "Nie udało się zapisać zamówienia." },
+        {
+          error: "Nie udało się zapisać zamówienia.",
+          details: error.message,
+        },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-  {
-    messageId: data.id,
-    publicToken: data.public_token,
-  },
-  { status: 201 }
-);
+      {
+        messageId: data.id,
+        publicToken: data.public_token,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Create message error:", error);
 
     return NextResponse.json(
-      { error: "Wystąpił błąd podczas zapisywania zamówienia." },
+      {
+        error: "Wystąpił błąd podczas zapisywania zamówienia.",
+        details:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      },
       { status: 500 }
     );
   }
