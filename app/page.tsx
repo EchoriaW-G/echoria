@@ -28,18 +28,18 @@ const productCopy: Record<
   echo: {
     name: "Echo",
     price: "19 zł",
-    description: "Wiadomość dostarczona online w wybranym dniu i godzinie.",
+    description: "Personalizowana wiadomość głosowa dostarczona online w wybranym terminie.",
   },
   gift: {
     name: "Echo Gift",
     price: "49 zł",
-    description: "Elegancka zawieszka z kodem QR, gotowa do wręczenia.",
+    description: "Elegancka zawieszka prezentowa z kodem QR, kryjącym Twoją wiadomość audio.",
     badge: "NOWOŚĆ",
   },
   frame: {
     name: "Echo Frame",
     price: "89 zł",
-    description: "Personalizowana ramka z kodem QR, gotowa do wręczenia.",
+    description: "Personalizowana ramka z kodem QR, pozwalająca zachować najpiękniejsze słowa na lata.",
   },
 };
 const shippingPrices = {
