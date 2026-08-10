@@ -1,6 +1,6 @@
 "use client";
 
-import { createElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
 type Step = "record" | "product" | "details";
@@ -87,7 +87,7 @@ const [shippingLockerAddress, setShippingLockerAddress] = useState("");
 const [shippingLockerDescription, setShippingLockerDescription] =
   useState("");
 
-const inpostWidgetRef = useRef<HTMLElement | null>(null);
+const inpostContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDigitalService, setAcceptDigitalService] = useState(false);
@@ -152,6 +152,26 @@ const totalPrice =
   };
 
  useEffect(() => {
+  (window as any).handleInPostPoint = (point: InPostPoint) => {
+    setShippingLocker(point.name);
+
+    setShippingLockerDescription(
+      point.location_description || ""
+    );
+
+    setShippingLockerAddress(
+      [point.address?.line1, point.address?.line2]
+        .filter(Boolean)
+        .join(", ")
+    );
+  };
+
+  return () => {
+    delete (window as any).handleInPostPoint;
+  };
+}, []);
+
+useEffect(() => {
   if (
     step !== "details" ||
     productType === "echo" ||
@@ -160,46 +180,35 @@ const totalPrice =
     return;
   }
 
-  const widget = inpostWidgetRef.current;
+  const container = inpostContainerRef.current;
 
-  if (!widget) {
+  if (!container) {
     return;
   }
 
-  const handleWidgetInit = (event: Event) => {
-    const customEvent = event as CustomEvent<{
-      api: InPostWidgetApi;
-    }>;
+  const token =
+    process.env.NEXT_PUBLIC_INPOST_GEOWIDGET_TOKEN;
 
-    customEvent.detail.api.addPointSelectedCallback(
-      (point: InPostPoint) => {
-        setShippingLocker(point.name);
+  if (!token) {
+    return;
+  }
 
-        setShippingLockerDescription(
-          point.location_description || ""
-        );
+  container.innerHTML = "";
 
-        setShippingLockerAddress(
-          [point.address?.line1, point.address?.line2]
-            .filter(Boolean)
-            .join(", ")
-        );
-      }
-    );
-  };
+  const widget = document.createElement("inpost-geowidget");
 
-  widget.addEventListener(
-    "inpost.geowidget.init",
-    handleWidgetInit
-  );
+  widget.setAttribute("token", token);
+  widget.setAttribute("language", "pl");
+  widget.setAttribute("config", "parcelCollect");
+  widget.setAttribute("onpoint", "handleInPostPoint");
+
+  container.appendChild(widget);
 
   return () => {
-    widget.removeEventListener(
-      "inpost.geowidget.init",
-      handleWidgetInit
-    );
+    container.innerHTML = "";
   };
 }, [step, productType, shippingMethod]);
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -711,14 +720,10 @@ shippingPrice: isPhysicalProduct
   )}
 
 {process.env.NEXT_PUBLIC_INPOST_GEOWIDGET_TOKEN ? (
-  <div className="overflow-hidden rounded-2xl bg-white">
-    {createElement("inpost-geowidget", {
-      ref: inpostWidgetRef,
-      token: process.env.NEXT_PUBLIC_INPOST_GEOWIDGET_TOKEN,
-      language: "pl",
-      config: "parcelCollect",
-    })}
-  </div>
+  <div
+    ref={inpostContainerRef}
+    className="overflow-hidden rounded-2xl bg-white min-h-[600px]"
+  />
 ) : (
   <p className="rounded-2xl border border-red-400/30 p-4 text-sm text-red-300">
     Brakuje tokenu Geowidget InPost.
