@@ -721,9 +721,9 @@ shippingPrice: isPhysicalProduct
 
 {process.env.NEXT_PUBLIC_INPOST_GEOWIDGET_TOKEN ? (
   <div
-    ref={inpostContainerRef}
-    className="overflow-hidden rounded-2xl bg-white min-h-[600px]"
-  />
+  ref={inpostContainerRef}
+  className="overflow-hidden rounded-2xl bg-white"
+/>
 ) : (
   <p className="rounded-2xl border border-red-400/30 p-4 text-sm text-red-300">
     Brakuje tokenu Geowidget InPost.
