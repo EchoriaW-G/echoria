@@ -1,11 +1,25 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { createElement, useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 
 type Step = "record" | "product" | "details";
 type ProductType = "echo" | "gift" | "frame";
 type ShippingMethod = "locker" | "courier";
+type InPostPoint = {
+  name: string;
+  location_description?: string;
+  address: {
+    line1: string;
+    line2: string;
+  };
+};
+
+type InPostWidgetApi = {
+  addPointSelectedCallback: (
+    callback: (point: InPostPoint) => void
+  ) => void;
+};
 
 const productCopy: Record<
   ProductType,
@@ -69,6 +83,11 @@ export default function Home() {
   useState<ShippingMethod>("locker");
 
 const [shippingLocker, setShippingLocker] = useState("");
+const [shippingLockerAddress, setShippingLockerAddress] = useState("");
+const [shippingLockerDescription, setShippingLockerDescription] =
+  useState("");
+
+const inpostWidgetRef = useRef<HTMLElement | null>(null);
 
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptDigitalService, setAcceptDigitalService] = useState(false);
@@ -132,6 +151,55 @@ const totalPrice =
     return new Date(year, month - 1, day, hours, minutes, 0).toISOString();
   };
 
+ useEffect(() => {
+  if (
+    step !== "details" ||
+    productType === "echo" ||
+    shippingMethod !== "locker"
+  ) {
+    return;
+  }
+
+  const widget = inpostWidgetRef.current;
+
+  if (!widget) {
+    return;
+  }
+
+  const handleWidgetInit = (event: Event) => {
+    const customEvent = event as CustomEvent<{
+      api: InPostWidgetApi;
+    }>;
+
+    customEvent.detail.api.addPointSelectedCallback(
+      (point: InPostPoint) => {
+        setShippingLocker(point.name);
+
+        setShippingLockerDescription(
+          point.location_description || ""
+        );
+
+        setShippingLockerAddress(
+          [point.address?.line1, point.address?.line2]
+            .filter(Boolean)
+            .join(", ")
+        );
+      }
+    );
+  };
+
+  widget.addEventListener(
+    "inpost.geowidget.init",
+    handleWidgetInit
+  );
+
+  return () => {
+    widget.removeEventListener(
+      "inpost.geowidget.init",
+      handleWidgetInit
+    );
+  };
+}, [step, productType, shippingMethod]);
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -249,9 +317,21 @@ const totalPrice =
           productType,
           shippingName: isPhysicalProduct ? shippingName : null,
           shippingPhone: isPhysicalProduct ? shippingPhone : null,
-          shippingAddress: isPhysicalProduct ? shippingAddress : null,
-          shippingPostcode: isPhysicalProduct ? shippingPostcode : null,
-          shippingCity: isPhysicalProduct ? shippingCity : null,
+         shippingAddress: isPhysicalProduct
+  ? shippingMethod === "locker"
+    ? `${shippingLocker} | ${shippingLockerAddress}`
+    : shippingAddress
+  : null,
+
+shippingPostcode:
+  isPhysicalProduct && shippingMethod === "courier"
+    ? shippingPostcode
+    : null,
+
+shippingCity:
+  isPhysicalProduct && shippingMethod === "courier"
+    ? shippingCity
+    : null,
           shippingMethod: isPhysicalProduct
   ? shippingMethod
   : null,
@@ -605,13 +685,46 @@ shippingPrice: isPhysicalProduct
                 </p>
               )}
               {shippingMethod === "locker" ? (
-  <input
-    type="text"
-    placeholder="Kod paczkomatu (na razie ręcznie)"
-    value={shippingLocker}
-    onChange={(event) => setShippingLocker(event.target.value)}
-    className="rounded-2xl bg-white p-4 text-black"
-  />
+  <div className="flex flex-col gap-4">
+  {shippingLocker && (
+    <div className="rounded-2xl border border-white/20 bg-white/[0.04] p-4">
+      <p className="text-sm uppercase tracking-widest text-gray-500">
+        Wybrany Paczkomat
+      </p>
+
+      <p className="mt-2 text-lg font-medium text-white">
+        {shippingLocker}
+      </p>
+
+      {shippingLockerDescription && (
+        <p className="mt-1 text-sm text-gray-400">
+          {shippingLockerDescription}
+        </p>
+      )}
+
+      {shippingLockerAddress && (
+        <p className="mt-1 text-sm text-gray-400">
+          {shippingLockerAddress}
+        </p>
+      )}
+    </div>
+  )}
+
+{process.env.NEXT_PUBLIC_INPOST_GEOWIDGET_TOKEN ? (
+  <div className="overflow-hidden rounded-2xl bg-white">
+    {createElement("inpost-geowidget", {
+      ref: inpostWidgetRef,
+      token: process.env.NEXT_PUBLIC_INPOST_GEOWIDGET_TOKEN,
+      language: "pl",
+      config: "parcelCollect",
+    })}
+  </div>
+) : (
+  <p className="rounded-2xl border border-red-400/30 p-4 text-sm text-red-300">
+    Brakuje tokenu Geowidget InPost.
+  </p>
+)}
+</div>
 ) : (
   <>
     <input
