@@ -772,12 +772,23 @@ shippingPrice: isPhysicalProduct
             className="rounded-2xl bg-white p-4 text-black"
           />
 
-          <textarea
-            placeholder="Dodaj dedykację (opcjonalnie)..."
-            value={dedication}
-            onChange={(event) => setDedication(event.target.value)}
-            className="min-h-[120px] rounded-2xl bg-white p-4 text-black"
-          />
+          <div>
+  <textarea
+    placeholder={
+      productType === "echo"
+        ? "Dedykacja (opcjonalnie)"
+        : "Krótka dedykacja (maks. 50 znaków)"
+    }
+    value={dedication}
+    onChange={(event) => setDedication(event.target.value)}
+    maxLength={productType === "echo" ? 500 : 50}
+    className="min-h-[120px] w-full rounded-2xl bg-white p-4 text-black"
+  />
+
+  <p className="mt-2 text-right text-sm text-gray-400">
+    {dedication.length}/{productType === "echo" ? 500 : 50}
+  </p>
+</div>
 
           <Agreements />
 
