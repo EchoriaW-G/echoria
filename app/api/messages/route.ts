@@ -15,6 +15,7 @@ const supabaseAdmin = createClient(
 type ProductType = "echo" | "gift" | "frame";
 type ShippingMethod = "locker" | "courier";
 
+
 type CreateMessageBody = {
   senderName: string;
   senderEmail: string;
@@ -27,6 +28,7 @@ type CreateMessageBody = {
   deliveryDate?: string | null;
   audioUrl: string;
   productType: ProductType;
+  frameColor?: "black" | "wood" | null;
 
   shippingName?: string | null;
   shippingPhone?: string | null;
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest) {
       audioUrl,
       productType,
       shippingName,
+      frameColor,
       shippingPhone,
       shippingAddress,
       shippingPostcode,
@@ -191,6 +194,10 @@ export async function POST(req: NextRequest) {
         audio_url: audioUrl,
         status: "pending",
         product_type: productType,
+        frame_color:
+  productType === "frame"
+    ? frameColor ?? "black"
+    : null,
 
         shipping_name: isPhysicalProduct
           ? shippingName?.trim() || null

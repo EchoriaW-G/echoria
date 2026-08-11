@@ -96,6 +96,7 @@ const inpostContainerRef = useRef<HTMLDivElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const mimeTypeRef = useRef("audio/webm");
+  const [frameColor, setFrameColor] = useState<"black" | "wood">("black");
 
   const isPhysicalProduct = productType !== "echo";
   const shippingPrice = isPhysicalProduct
@@ -179,6 +180,41 @@ useEffect(() => {
   ) {
     return;
   }
+{productType === "frame" && (
+  <div className="space-y-3">
+    <label className="block text-lg font-medium">
+      Wybierz kolor ramki
+    </label>
+
+    <div className="grid grid-cols-2 gap-4">
+
+      <button
+        type="button"
+        onClick={() => setFrameColor("black")}
+        className={`rounded-2xl border p-4 transition ${
+          frameColor === "black"
+            ? "border-white bg-white text-black"
+            : "border-zinc-700"
+        }`}
+      >
+        Czarna
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setFrameColor("wood")}
+        className={`rounded-2xl border p-4 transition ${
+          frameColor === "wood"
+            ? "border-white bg-white text-black"
+            : "border-zinc-700"
+        }`}
+      >
+        Drewno
+      </button>
+
+    </div>
+  </div>
+)}
 
   const container = inpostContainerRef.current;
 
@@ -324,6 +360,7 @@ useEffect(() => {
               : null,
           audioUrl: uploadedAudioUrl,
           productType,
+          frameColor: productType === "frame" ? frameColor : null,
           shippingName: isPhysicalProduct ? shippingName : null,
           shippingPhone: isPhysicalProduct ? shippingPhone : null,
          shippingAddress: isPhysicalProduct
