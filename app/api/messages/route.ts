@@ -30,7 +30,7 @@ type CreateMessageBody = {
   productType: ProductType;
   frameColor?: "black" | "wood" | null;
   frameVariant?: "dedication" | "photo" | null;
-framePhotoUrl?: string | null;
+framePhotoPath?: string | null;
 
   shippingName?: string | null;
   shippingPhone?: string | null;
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       shippingName,
       frameColor,
       frameVariant,
-framePhotoUrl,
+framePhotoPath,
       shippingPhone,
       shippingAddress,
       shippingPostcode,
@@ -207,10 +207,10 @@ frame_variant:
     ? frameVariant
     : null,
 
-frame_photo_url:
+frame_photo_path:
   productType === "frame" &&
   frameVariant === "photo"
-    ? framePhotoUrl
+    ? framePhotoPath
     : null,
         shipping_name: isPhysicalProduct
           ? shippingName?.trim() || null

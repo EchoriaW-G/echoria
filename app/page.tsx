@@ -340,7 +340,7 @@ useEffect(() => {
     setStep("details");
   };
 
-  const uploadFramePhoto = async () => {
+ const uploadFramePhoto = async () => {
   if (!framePhoto) {
     return null;
   }
@@ -349,26 +349,25 @@ useEffect(() => {
 
   try {
     const extension =
-      framePhoto.name.split(".").pop() || "jpg";
+      framePhoto.name.split(".").pop()?.toLowerCase() || "jpg";
 
-    const fileName =
-      `frame-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const orderPhotoId = crypto.randomUUID();
+
+    const filePath =
+      `orders/${orderPhotoId}/photo.${extension}`;
 
     const { error } = await supabase.storage
       .from("frame-photos")
-      .upload(fileName, framePhoto, {
+      .upload(filePath, framePhoto, {
         contentType: framePhoto.type,
+        upsert: false,
       });
 
     if (error) {
       throw error;
     }
 
-    const { data } = supabase.storage
-      .from("frame-photos")
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
+    return filePath;
   } finally {
     setIsUploadingPhoto(false);
   }
@@ -387,7 +386,7 @@ useEffect(() => {
     setIsSaving(true);
 
     try {
-      let uploadedFramePhotoUrl: string | null = null;
+      let uploadedFramePhotoPath: string | null = null;
 
 if (
   productType === "frame" &&
@@ -399,8 +398,8 @@ if (
     return;
   }
 
-  uploadedFramePhotoUrl =
-    await uploadFramePhoto();
+  uploadedFramePhotoPath =
+  await uploadFramePhoto();
 }
       const messageResponse = await fetch("/api/messages", {
         method: "POST",
@@ -435,7 +434,7 @@ if (
 framePhotoUrl:
   productType === "frame" &&
   frameVariant === "photo"
-    ? uploadedFramePhotoUrl
+    ? uploadedFramePhotoPath
     : null,
           
           frameColor: productType === "frame" ? frameColor : null,
