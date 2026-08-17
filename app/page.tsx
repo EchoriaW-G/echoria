@@ -61,6 +61,8 @@ export default function Home() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [uploadedAudioUrl, setUploadedAudioUrl] = useState<string | null>(null);
   const [productType, setProductType] = useState<ProductType>("echo");
+  const [frameColor, setFrameColor] =
+  useState<"black" | "wood">("black");
 
   const [senderName, setSenderName] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
@@ -96,7 +98,6 @@ const inpostContainerRef = useRef<HTMLDivElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const mimeTypeRef = useRef("audio/webm");
-  const [frameColor, setFrameColor] = useState<"black" | "wood">("black");
 
   const isPhysicalProduct = productType !== "echo";
   const shippingPrice = isPhysicalProduct
@@ -360,6 +361,7 @@ useEffect(() => {
               : null,
           audioUrl: uploadedAudioUrl,
           productType,
+          
           frameColor: productType === "frame" ? frameColor : null,
           shippingName: isPhysicalProduct ? shippingName : null,
           shippingPhone: isPhysicalProduct ? shippingPhone : null,
@@ -515,33 +517,52 @@ shippingPrice: isPhysicalProduct
           </div>
 
           {(Object.keys(productCopy) as ProductType[]).map((product) => {
-            const copy = productCopy[product];
-            return (
-              <button
-                key={product}
-                type="button"
-                onClick={() => chooseProduct(product)}
-                className="relative w-full rounded-2xl border border-white/20 p-5 text-left transition hover:bg-white/5"
-              >
-                {copy.badge && (
-                  <span className="absolute -top-3 right-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-black">
-                    {copy.badge}
-                  </span>
-                )}
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-lg font-medium">{copy.name}</p>
-                    <p className="mt-1 text-sm text-gray-400">
-                      {copy.description}
-                    </p>
-                  </div>
-                  <span className="whitespace-nowrap font-medium">
-                    {copy.price}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+  const copy = productCopy[product];
+  const isDisabled = product === "gift";
+
+  return (
+    <button
+      key={product}
+      type="button"
+      disabled={isDisabled}
+      onClick={() => {
+        if (!isDisabled) {
+          chooseProduct(product);
+        }
+      }}
+      className={`relative w-full rounded-2xl border p-5 text-left transition ${
+        isDisabled
+          ? "cursor-not-allowed border-white/10 opacity-50"
+          : "border-white/20 hover:bg-white/5"
+      }`}
+    >
+      {product === "gift" ? (
+        <span className="absolute -top-3 right-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-black">
+          WKRÓTCE
+        </span>
+      ) : (
+        copy.badge && (
+          <span className="absolute -top-3 right-4 rounded-full bg-white px-3 py-1 text-xs font-medium text-black">
+            {copy.badge}
+          </span>
+        )
+      )}
+
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-lg font-medium">{copy.name}</p>
+          <p className="mt-1 text-sm text-gray-400">
+            {copy.description}
+          </p>
+        </div>
+
+        <span className="whitespace-nowrap font-medium">
+          {copy.price}
+        </span>
+      </div>
+    </button>
+  );
+})}
 
           <button
             type="button"
@@ -826,6 +847,72 @@ shippingPrice: isPhysicalProduct
     {dedication.length}/{productType === "echo" ? 500 : 50}
   </p>
 </div>
+
+{productType === "frame" && (
+  <div className="flex flex-col gap-3">
+    <p className="text-sm font-medium text-gray-200">
+      Wybierz kolor ramki
+    </p>
+
+    <div className="grid grid-cols-2 gap-4">
+      <button
+        type="button"
+        onClick={() => setFrameColor("black")}
+        className={`overflow-hidden rounded-2xl border text-left transition ${
+          frameColor === "black"
+            ? "border-white bg-white/10"
+            : "border-white/20 bg-white/[0.03]"
+        }`}
+      >
+        <img
+          src="/frame-black.jpg"
+          alt="Czarna ramka"
+          className="aspect-square w-full object-cover"
+        />
+
+        <div className="p-3">
+          <p className="font-medium text-white">
+            Czarna
+          </p>
+
+          {frameColor === "black" && (
+            <p className="mt-1 text-xs text-gray-400">
+              Wybrano
+            </p>
+          )}
+        </div>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setFrameColor("wood")}
+        className={`overflow-hidden rounded-2xl border text-left transition ${
+          frameColor === "wood"
+            ? "border-white bg-white/10"
+            : "border-white/20 bg-white/[0.03]"
+        }`}
+      >
+        <img
+          src="/frame-wood.jpg"
+          alt="Ramka w kolorze drewna"
+          className="aspect-square w-full object-cover"
+        />
+
+        <div className="p-3">
+          <p className="font-medium text-white">
+            Kolor drewna
+          </p>
+
+          {frameColor === "wood" && (
+            <p className="mt-1 text-xs text-gray-400">
+              Wybrano
+            </p>
+          )}
+        </div>
+      </button>
+    </div>
+  </div>
+)}
 
           <Agreements />
 
