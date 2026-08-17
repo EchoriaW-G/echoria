@@ -29,6 +29,8 @@ type CreateMessageBody = {
   audioUrl: string;
   productType: ProductType;
   frameColor?: "black" | "wood" | null;
+  frameVariant?: "dedication" | "photo" | null;
+framePhotoUrl?: string | null;
 
   shippingName?: string | null;
   shippingPhone?: string | null;
@@ -63,6 +65,8 @@ export async function POST(req: NextRequest) {
       productType,
       shippingName,
       frameColor,
+      frameVariant,
+framePhotoUrl,
       shippingPhone,
       shippingAddress,
       shippingPostcode,
@@ -198,7 +202,16 @@ export async function POST(req: NextRequest) {
   productType === "frame"
     ? frameColor ?? "black"
     : null,
+frame_variant:
+  productType === "frame"
+    ? frameVariant
+    : null,
 
+frame_photo_url:
+  productType === "frame" &&
+  frameVariant === "photo"
+    ? framePhotoUrl
+    : null,
         shipping_name: isPhysicalProduct
           ? shippingName?.trim() || null
           : null,

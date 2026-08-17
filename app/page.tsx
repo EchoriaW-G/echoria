@@ -63,6 +63,12 @@ export default function Home() {
   const [productType, setProductType] = useState<ProductType>("echo");
   const [frameColor, setFrameColor] =
   useState<"black" | "wood">("black");
+  const [frameVariant, setFrameVariant] =
+  useState<"dedication" | "photo">("dedication");
+
+const [framePhoto, setFramePhoto] = useState<File | null>(null);
+const [framePhotoUrl, setFramePhotoUrl] = useState<string | null>(null);
+const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const [senderName, setSenderName] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
@@ -104,8 +110,15 @@ const inpostContainerRef = useRef<HTMLDivElement | null>(null);
   ? shippingPrices[shippingMethod]
   : 0;
 
+const framePhotoExtra =
+  productType === "frame" && frameVariant === "photo"
+    ? 10
+    : 0;
+
 const totalPrice =
-  productPrices[productType] + shippingPrice;
+  productPrices[productType] +
+  shippingPrice +
+  framePhotoExtra;
   const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
   const isValidPhone = (phone: string) =>
     /^\+?[0-9]{9,15}$/.test(phone.replace(/\s/g, ""));
@@ -327,6 +340,39 @@ useEffect(() => {
     setStep("details");
   };
 
+  const uploadFramePhoto = async () => {
+  if (!framePhoto) {
+    return null;
+  }
+
+  setIsUploadingPhoto(true);
+
+  try {
+    const extension =
+      framePhoto.name.split(".").pop() || "jpg";
+
+    const fileName =
+      `frame-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+    const { error } = await supabase.storage
+      .from("frame-photos")
+      .upload(fileName, framePhoto, {
+        contentType: framePhoto.type,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const { data } = supabase.storage
+      .from("frame-photos")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  } finally {
+    setIsUploadingPhoto(false);
+  }
+};
   const saveMessage = async () => {
     if (!uploadedAudioUrl) {
       alert("Nagranie nie zostało przesłane.");
@@ -341,6 +387,21 @@ useEffect(() => {
     setIsSaving(true);
 
     try {
+      let uploadedFramePhotoUrl: string | null = null;
+
+if (
+  productType === "frame" &&
+  frameVariant === "photo"
+) {
+  if (!framePhoto) {
+    alert("Dodaj zdjęcie do ramki.");
+    setIsSaving(false);
+    return;
+  }
+
+  uploadedFramePhotoUrl =
+    await uploadFramePhoto();
+}
       const messageResponse = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -354,13 +415,28 @@ useEffect(() => {
           smsNotification:
             productType === "echo" && smsNotification,
           discountCode,
-          dedication,
+          dedication:
+  productType === "frame" &&
+  frameVariant === "photo"
+    ? null
+    : dedication,
           deliveryDate:
             productType === "echo"
               ? buildDeliveryTimestamp()
               : null,
+              
           audioUrl: uploadedAudioUrl,
           productType,
+          frameVariant:
+  productType === "frame"
+    ? frameVariant
+    : null,
+
+framePhotoUrl:
+  productType === "frame" &&
+  frameVariant === "photo"
+    ? uploadedFramePhotoUrl
+    : null,
           
           frameColor: productType === "frame" ? frameColor : null,
           shippingName: isPhysicalProduct ? shippingName : null,
@@ -592,7 +668,230 @@ shippingPrice: isPhysicalProduct
               {productCopy[productType].price}
             </p>
           </div>
+{productType === "frame" && (
+  <div className="flex flex-col gap-3">
+    <p className="text-sm font-medium text-gray-200">
+      Wybierz kolor ramki
+    </p>
 
+    <div className="grid grid-cols-2 gap-4">
+      <button
+        type="button"
+        onClick={() => setFrameColor("black")}
+        className={`overflow-hidden rounded-2xl border text-left transition ${
+          frameColor === "black"
+            ? "border-white bg-white/10"
+            : "border-white/20 bg-white/[0.03]"
+        }`}
+      >
+        <img
+          src="/frame-black.jpg"
+          alt="Czarna ramka"
+          className="aspect-square w-full object-cover"
+        />
+
+        <div className="p-3">
+          <p className="font-medium text-white">
+            Czarna
+          </p>
+
+          {frameColor === "black" && (
+            <p className="mt-1 text-xs text-gray-400">
+              Wybrano
+            </p>
+          )}
+        </div>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setFrameColor("wood")}
+        className={`overflow-hidden rounded-2xl border text-left transition ${
+          frameColor === "wood"
+            ? "border-white bg-white/10"
+            : "border-white/20 bg-white/[0.03]"
+        }`}
+      >
+        <img
+          src="/frame-wood.jpg"
+          alt="Ramka w kolorze drewna"
+          className="aspect-square w-full object-cover"
+        />
+
+        <div className="p-3">
+          <p className="font-medium text-white">
+            Kolor drewna
+          </p>
+
+          {frameColor === "wood" && (
+            <p className="mt-1 text-xs text-gray-400">
+              Wybrano
+            </p>
+          )}
+        </div>
+      </button>
+    </div>
+  </div>
+)}
+{productType === "frame" && (
+  <div className="flex flex-col gap-3">
+    <p className="text-sm font-medium text-gray-200">
+      Wybierz sposób personalizacji
+    </p>
+
+    <div className="grid grid-cols-2 gap-4">
+
+      {/* Z dedykacją */}
+      <button
+        type="button"
+        onClick={() => {
+          setFrameVariant("dedication");
+          setFramePhoto(null);
+          setFramePhotoUrl(null);
+        }}
+        className={`overflow-hidden rounded-2xl border text-left transition ${
+          frameVariant === "dedication"
+            ? "border-white bg-white/10"
+            : "border-white/20 bg-white/[0.03]"
+        }`}
+      >
+        <img
+          src="/frame-dedication.jpg"
+          alt="Ramka z dedykacją"
+          className="aspect-square w-full object-cover"
+        />
+
+        <div className="p-3">
+          <p className="font-medium text-white">
+            Z dedykacją
+          </p>
+
+          <p className="mt-1 text-xs text-gray-400">
+            Twój tekst w ramce
+          </p>
+
+          {frameVariant === "dedication" && (
+            <p className="mt-1 text-xs text-gray-400">
+              Wybrano
+            </p>
+          )}
+        </div>
+      </button>
+
+
+      {/* Ze zdjęciem */}
+      <button
+        type="button"
+        onClick={() => {
+          setFrameVariant("photo");
+          setDedication("");
+        }}
+        className={`overflow-hidden rounded-2xl border text-left transition ${
+          frameVariant === "photo"
+            ? "border-white bg-white/10"
+            : "border-white/20 bg-white/[0.03]"
+        }`}
+      >
+        <img
+          src="/frame-photo.jpg"
+          alt="Ramka ze zdjęciem"
+          className="aspect-square w-full object-cover"
+        />
+
+        <div className="p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-medium text-white">
+              Ze zdjęciem
+            </p>
+
+            <span className="text-xs font-medium text-white">
+              +10 zł
+            </span>
+          </div>
+
+          <p className="mt-1 text-xs text-gray-400">
+            Twoje zdjęcie w ramce
+          </p>
+
+          {frameVariant === "photo" && (
+            <p className="mt-1 text-xs text-gray-400">
+              Wybrano
+            </p>
+          )}
+        </div>
+      </button>
+
+    </div>
+  </div>
+)}
+{productType === "frame" &&
+  frameVariant === "dedication" && (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm font-medium text-gray-200">
+        Dodaj dedykację
+      </p>
+
+      <textarea
+        placeholder="Wpisz swoją dedykację..."
+        value={dedication}
+        onChange={(event) => setDedication(event.target.value)}
+        maxLength={100}
+        className="min-h-[120px] w-full rounded-2xl bg-white p-4 text-black"
+      />
+
+      <p className="text-right text-xs text-gray-400">
+        {dedication.length}/100 znaków
+      </p>
+    </div>
+)}
+  {productType === "frame" &&
+  frameVariant === "photo" && (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm font-medium text-gray-200">
+        Dodaj zdjęcie do ramki
+      </p>
+
+      <label className="cursor-pointer rounded-2xl border border-dashed border-white/30 p-6 text-center transition hover:bg-white/5">
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+
+            if (!file) return;
+
+            setFramePhoto(file);
+
+            const previewUrl =
+              URL.createObjectURL(file);
+
+            setFramePhotoUrl(previewUrl);
+          }}
+        />
+
+        <p className="font-medium text-white">
+          {framePhoto
+            ? "Zmień zdjęcie"
+            : "Wybierz zdjęcie"}
+        </p>
+
+        <p className="mt-1 text-xs text-gray-400">
+          JPG, PNG lub WEBP
+        </p>
+      </label>
+
+      {framePhotoUrl && (
+        <div className="overflow-hidden rounded-2xl border border-white/10">
+          <img
+            src={framePhotoUrl}
+            alt="Podgląd zdjęcia do ramki"
+            className="aspect-[4/3] w-full object-cover"
+          />
+        </div>
+      )}
+    </div>
+  )}
           <input
             type="text"
             placeholder="Twoje imię"
@@ -830,89 +1129,6 @@ shippingPrice: isPhysicalProduct
             className="rounded-2xl bg-white p-4 text-black"
           />
 
-          <div>
-  <textarea
-    placeholder={
-      productType === "echo"
-        ? "Dedykacja (opcjonalnie)"
-        : "Krótka dedykacja (maks. 50 znaków)"
-    }
-    value={dedication}
-    onChange={(event) => setDedication(event.target.value)}
-    maxLength={productType === "echo" ? 500 : 50}
-    className="min-h-[120px] w-full rounded-2xl bg-white p-4 text-black"
-  />
-
-  <p className="mt-2 text-right text-sm text-gray-400">
-    {dedication.length}/{productType === "echo" ? 500 : 50}
-  </p>
-</div>
-
-{productType === "frame" && (
-  <div className="flex flex-col gap-3">
-    <p className="text-sm font-medium text-gray-200">
-      Wybierz kolor ramki
-    </p>
-
-    <div className="grid grid-cols-2 gap-4">
-      <button
-        type="button"
-        onClick={() => setFrameColor("black")}
-        className={`overflow-hidden rounded-2xl border text-left transition ${
-          frameColor === "black"
-            ? "border-white bg-white/10"
-            : "border-white/20 bg-white/[0.03]"
-        }`}
-      >
-        <img
-          src="/frame-black.jpg"
-          alt="Czarna ramka"
-          className="aspect-square w-full object-cover"
-        />
-
-        <div className="p-3">
-          <p className="font-medium text-white">
-            Czarna
-          </p>
-
-          {frameColor === "black" && (
-            <p className="mt-1 text-xs text-gray-400">
-              Wybrano
-            </p>
-          )}
-        </div>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setFrameColor("wood")}
-        className={`overflow-hidden rounded-2xl border text-left transition ${
-          frameColor === "wood"
-            ? "border-white bg-white/10"
-            : "border-white/20 bg-white/[0.03]"
-        }`}
-      >
-        <img
-          src="/frame-wood.jpg"
-          alt="Ramka w kolorze drewna"
-          className="aspect-square w-full object-cover"
-        />
-
-        <div className="p-3">
-          <p className="font-medium text-white">
-            Kolor drewna
-          </p>
-
-          {frameColor === "wood" && (
-            <p className="mt-1 text-xs text-gray-400">
-              Wybrano
-            </p>
-          )}
-        </div>
-      </button>
-    </div>
-  </div>
-)}
 
           <Agreements />
 
