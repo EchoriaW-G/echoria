@@ -431,7 +431,7 @@ if (
     ? frameVariant
     : null,
 
-framePhotoUrl:
+framePhotoPath:
   productType === "frame" &&
   frameVariant === "photo"
     ? uploadedFramePhotoPath
